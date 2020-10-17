@@ -1,0 +1,21 @@
+references
+
+- setup electrum/EPS
+    https://curiosityoverflow.xyz/posts/bitcoin-electrum-wallet/
+    https://medium.com/@armantheparman/bitcoin-core-full-node-on-mac-os-with-electrum-personal-server-and-electrum-desktop-wallet-c4ad0c1543ec
+
+- electrum intro (good)
+    https://bitzuma.com/posts/a-beginners-guide-to-the-electrum-bitcoin-wallet/
+
+- create liveCD ubuntu
+    https://help.ubuntu.com/community/LiveCDCustomizationFromScratch
+    https://help.ubuntu.com/community/LiveCDCustomization
+    https://github.com/mvallim/live-custom-ubuntu-from-scratch (GOOD)
+    https://medium.com/pranav-kulshrestha/building-your-own-customized-liveiso-from-scratch-e32b82522bf7
+
+- create usb persistent partition
+    https://askubuntu.com/questions/1181854/how-is-it-easier-to-make-a-persistent-live-drive-with-ubuntu-19-10
+
+- ARM vs x86 performance study
+    see http://junsun.net/wordpress/2020/10/aws-arm64-vs-x86_64-bitcoin-performance-comparison/
+    t4g.medium is sufficient for running full node.
