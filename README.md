@@ -35,7 +35,7 @@ Two networking modes
 
 One-time preparation
 - (optional) Build EROAS ISO image from source. (See below).
-    - Or download [the prebuilt v0.8.0 iso image] (https://drive.google.com/file/d/16MnN00eq4RcCpbZa7cydGBBcpTLNSE8z/view?usp=sharing)
+    - Or download [the prebuilt v0.8.0 iso image](https://drive.google.com/file/d/16MnN00eq4RcCpbZa7cydGBBcpTLNSE8z/view?usp=sharing)
 - Flash ISO image to the USB public drive (see below)
 
 Running
