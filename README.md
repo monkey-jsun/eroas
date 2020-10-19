@@ -34,15 +34,23 @@ Two networking modes
 ### User experience
 
 One-time preparation
-- (optional) Build EROAS ISO image from source. Or download prebuilt iso image.
+- (optional) Build EROAS ISO image from source. (See below).
+    - Or download [the prebuilt v0.8.0 iso image] (https://drive.google.com/file/d/16MnN00eq4RcCpbZa7cydGBBcpTLNSE8z/view?usp=sharing)
 - Flash ISO image to the USB public drive (see below)
 
 Running
-- Insert USB into any PC or Mac and boot from the USB drive.
-- (Optional) Press finger to unlock secure drive
-- Once desktop starts, start a terminal and type "electrum".  Follow its UI to create wallet and start transactions.
-    - Go to "Tools"/"Network"/"Proxy" and select "Use Tor proxy at port 9050".  You should connect to the Electrum network.
+- Boot up PC/Mac from USB drive
+    - Insert USB into any PC or Mac
+    - Power up 
+    - Quickly interrupt boot up sequency and drop into bootup manager
+        - Google around for your machine for detailed instructions
+    - Optionally press finger to unlock secure drive
+    - Select the proper USB drive to boot up
+- Once desktop starts, start a terminal and type "electrum".
+    - Follow its UI to create wallet and start transactions.
+    - Go to "Tools"/"Network"/"Proxy" and select "Use Tor proxy at port 9050"
 - Power down machine after every use.
+- Reboot machine to check all data are persistent.
 
 ### Flash usb disk
 
@@ -51,6 +59,13 @@ Running
 - For Linux, one can simply use dd command (e.g., "dd if=eroas-v0.8.0-20201018-152032.iso of=/dev/sdb bs=4M")
 - To flush into fingerprint-protected secure drive, please press your finger and unlock secure dirve first.
     - Please do not install EROAS into both public and secure drive.  The persistent data partition will get mixed up.  
+
+### Build ISO image
+
+- Have a ubuntu 20.04 host (other debian-based distro could work, but not tested and may need minor changes)
+- git clone https://github.com/monkey-jsun/eroas.git
+- cd eroas
+- ./build_eroas.sh -
 
 ### TODO
 
