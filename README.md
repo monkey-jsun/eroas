@@ -62,7 +62,9 @@ Running
 
 ### Build ISO image
 
-- Have a ubuntu 20.04 host (other debian-based distro could work, but not tested and may need minor changes)
+- Have a ubuntu 20.04 host
+    - other debian-based distro could work, but not tested and may need minor changes
+    - no GUI necessary (e.g, AWS ubuntu 20.04 server suffices)
 - git clone https://github.com/monkey-jsun/eroas.git
 - cd eroas
 - ./build_eroas.sh -
