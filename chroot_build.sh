@@ -5,6 +5,8 @@ set -o pipefail         # exit on pipeline error
 set -u                  # treat unset variable as error
 #set -x
 
+ELECTRUM_VERSION="4.0.4"
+
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 CHROOT_DIR=$SCRIPT_DIR/chroot
 
@@ -85,8 +87,31 @@ EOF
     ln -s /bin/true /sbin/initctl
 }
 
+function install_wallet() {
+    echo "=====> running install_wallet ..."
+    apt-get install -y tor
+    apt-get install -y cryptsetup
+
+    cd $HOME
+    apt-get install -y python3-pyqt5 libsecp256k1-0 python3-cryptography python3-setuptools python3-pip
+    pip3 install https://download.electrum.org/$ELECTRUM_VERSION/Electrum-$ELECTRUM_VERSION.tar.gz
+
+    # setup a basic firewall for now.
+    # I should not need the last "deny out 50002" rule. But otherwise
+    # first time up the outgoing traffic to 50002 still happens.
+    ufw default deny incoming
+    ufw default deny outgoing
+    ufw allow out 22
+    ufw allow out 53
+    ufw allow out 80
+    ufw allow out 443
+    ufw allow out 9001
+    ufw deny out 50002
+    ufw enable
+}
+
 function install_pkg() {
-    install_pkg_full
+    install_pkg_simple
 }
 
 function install_pkg_simple() {
@@ -96,8 +121,48 @@ function install_pkg_simple() {
     # install live linux packages
     apt-get install -y ubuntu-standard casper lupin-casper laptop-detect os-prober linux-generic
 
+    # install networking packages
+    apt-get install -y \
+        network-manager \
+        resolvconf \
+        net-tools \
+        wireless-tools \
+        wpagui \
+        locales
+
     # install graphics and desktop
     apt-get install -y xfce4
+    
+    # install some utils
+    apt-get install -y vim less curl apt-transport-https
+
+    # disable cups by default (TODO: not working??)
+    systemctl disable cups
+
+    # install electrum wallet and related pkgs
+    install_wallet
+
+    # remove unneeded packages
+    apt-get autoremove -y
+
+    # configure pkgs
+    dpkg-reconfigure locales
+    dpkg-reconfigure resolvconf
+
+    # network manager
+    cat <<EOF > /etc/NetworkManager/NetworkManager.conf
+[main]
+rc-manager=resolvconf
+plugins=ifupdown,keyfile
+dns=dnsmasq
+
+[ifupdown]
+managed=false
+EOF
+    dpkg-reconfigure network-manager
+
+    # strange, without apt-get clean, screen is dark, why??
+    apt-get clean -y
 }
 
 function install_pkg_full() {

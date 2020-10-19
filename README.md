@@ -1,64 +1,61 @@
 # EROAS
 
 EROAS stands for "Electrum Running On A Stick". 
-EROAS runs Electrum wallet on fingerprint-protected USB disk to achieve
-cold-wallet security and warm-wallet convenience at a budget price.  
-It is meant to
-operate like a safe or saving account for infrequent transactions (perhaps <1 transaction per day),
+It runs Electrum wallet on USB disk to achieve cold-wallet level security while keeping warm-wallet-like convenience at a budget price.  
+It is meant to operate like a safe or saving account for infrequent transactions (perhaps <1 transaction per day),
 and is suitable to protect assets from anywhere from $1K to $10M USD.
 
 To use EROAS, simply insert EROAS USB drive into PC/MacBook and boot
-from it. Press your fingerprint to unlock the secure drive.  Afterwards,
-Electrum will start and guide you through the transactions.
-Afterwards you shut down the machine, unplug the drive and store it 
-securely.
+from it. You can use fingerprint-protected secure drive to achieve higher security.
+After system boots up, Electrum will start and guide you through the transactions.
+Afterwards you shut down the machine, unplug the drive and store it securely.
 
 
 ### Operating modes:
 
+Two networking modes
 - Use EROAS with Tor to connect to open Electrum netowrk
-- Use EROAS with a single designated Electrum server for better security and privacy
+- Use EROAS with a single designated Electrum server for better security and privacy 
 
 ### Security features
 
-- The system image is an unmutable ISO image, resistent to all persistent attacks.
-- Data partition 
-    - is password-protected crypto file system
-    - is on a hidden, secondary partiton
-    - is on a fingerprint-protect secure drive
-- Networking
-    - In Tor mode, no incoming traffic is allowed
-    - In dedicated electrum server mode, no incoming traffic is allowed, and
-      only outgoing traffic allowed is for the dedicated server at dedicated
-      port
+- The system image is an unmutable ISO image, resistent to all persistent attacks. (TODO)
+- Data partition is password-protected crypto file system (TODO)
+- Support fingerprint-protected secure drive for additional security
+- Default firewall that denies all incoming traffic and restrict outgoing traffic a few ports.
+- Use Tor for additional privacy and security
+- Support dedicated electrum server mode (TODO)
 - Usual security measures in Electrum (e.g, wallet password)
 - Every byte of code is generated from open source software and you can build from scratch
-- Only use general purposed and open architecture hardware (PC/Mac/USB disks)
-
-### Other features
-
-- supported usb drives include: 
-    - Lexar JumpDrive Fingerprint (https://www.lexar.com/portfolio_page/jumpdrive-fingerprint-f35-usb-3-0-flash-drive/)
-    - Eaget fingerprint pendrive
-- support 2 ways to backup and restore
-    backup data partition as a backup file.
-    backup Electrum Mnemonic phrases
+- Use general purposed and open architecture hardware (PC/Mac/USB disks).  No proprietary code or hardware.
 - support both mac and PC
 
 
 ### User experience
 
 One-time preparation
-- (optional) Build EROAS ISO image from source
-- Flash ISO image to the USB public drive
+- (optional) Build EROAS ISO image from source. Or download prebuilt iso image.
+- Flash ISO image to the USB public drive (see below)
 
 Running
 - Insert USB into any PC or Mac and boot from the USB drive.
-- Press finger to unlock secure drive
-- if it is first time running
-    - Upon prompt, select and enter password for encrypted filesystem
-    - Select Electrum network options: using Tor or using a trusted server.
-- Otherwise
-    - Upon prompt, enter password for encrypted filesystem
-- Electrum wallet will start automatically. Follow its UI to create wallet and start transactions.
+- (Optional) Press finger to unlock secure drive
+- Once desktop starts, start a terminal and type "electrum".  Follow its UI to create wallet and start transactions.
+    - Go to "Tools"/"Network"/"Proxy" and select "Use Tor proxy at port 9050".  You should connect to the Electrum network.
 - Power down machine after every use.
+
+### Flash usb disk
+
+- We recomment Etcher (https://www.balena.io/etcher/), which runs on Mac, Windows and Linux
+- For windows, one can also use rufus.  Please use all default options and "dd" method to do the flahsing.
+- For Linux, one can simply use dd command (e.g., "dd if=eroas-v0.8.0-20201018-152032.iso of=/dev/sdb bs=4M")
+- To flush into fingerprint-protected secure drive, please press your finger and unlock secure dirve first.
+    - Please do not install EROAS into both public and secure drive.  The persistent data partition will get mixed up.  
+
+### TODO
+
+- add crypto FS to the persistent data partition 
+- limit the ability to override system files and become truely immutable
+- add script to set up network mode
+    - start electrum differently accordingly to the mode
+    - add additional firewall rules for designated server mode

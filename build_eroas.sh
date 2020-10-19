@@ -10,6 +10,7 @@ CHROOT_DIR=$SCRIPT_DIR/chroot
 
 CMD=(setup_host debootstrap run_chroot build_iso)
 
+VERSION="v0.8.0"
 DATE=`TZ="UTC" date +"%y%m%d-%H%M%S"`
 
 function help() {
@@ -77,6 +78,7 @@ function run_chroot() {
 
     sudo ln -f $SCRIPT_DIR/chroot_build.sh $CHROOT_DIR/root/chroot_build.sh
     sudo chroot $CHROOT_DIR /root/chroot_build.sh -
+    sudo rm -f $CHROOT_DIR/root/chroot_build.sh
 
     sudo umount $CHROOT_DIR/dev
     sudo umount $CHROOT_DIR/run
@@ -85,6 +87,7 @@ function run_chroot() {
 function build_iso() {
     echo "=====> running build_iso ..."
 
+    rm -rf image
     mkdir -p image/{casper,isolinux,install}
 
     # copy kernel files
@@ -103,7 +106,7 @@ set default="0"
 set timeout=30
 
 menuentry "Run EROAS (Electrum Running On A Stick)" {
-   linux /casper/vmlinuz boot=casper nopersistent toram quiet splash ---
+   linux /casper/vmlinuz boot=casper persistent toram splash noprompt fsck.mode=skip ---
    initrd /casper/initrd
 }
 
@@ -112,6 +115,12 @@ menuentry "Check disc for defects" {
    initrd /casper/initrd
 }
 EOF
+
+# options
+#   noprompt - don't ask to eject media on reboot/shutdown
+#   fsck.mode=skip - skip initial media integrity checking
+# original option
+#   linux /casper/vmlinuz boot=casper nopersistent toram quiet splash ---
 
     # generate manifest
     sudo chroot chroot dpkg-query -W --showformat='${Package} ${Version}\n' | sudo tee image/casper/filesystem.manifest
@@ -128,7 +137,7 @@ EOF
 
     # create diskdefines
     cat <<EOF > image/README.diskdefines
-#define DISKNAME  Electrum Running on Stick
+#define DISKNAME  Electrum Running On A Stick
 #define TYPE  binary
 #define TYPEbinary  1
 #define ARCH  amd64
@@ -173,7 +182,7 @@ EOF
         -as mkisofs \
         -iso-level 3 \
         -full-iso9660-filenames \
-        -volid "Electrum Running On Stick" \
+        -volid "EROAS_$VERSION" \
         -eltorito-boot boot/grub/bios.img \
         -no-emul-boot \
         -boot-load-size 4 \
@@ -185,7 +194,7 @@ EOF
         -e EFI/efiboot.img \
         -no-emul-boot \
         -append_partition 2 0xef isolinux/efiboot.img \
-        -output "../eros-$DATE.iso" \
+        -output "../eroas-$VERSION-$DATE.iso" \
         -m "isolinux/efiboot.img" \
         -m "isolinux/bios.img" \
         -graft-points \
