@@ -1,0 +1,10 @@
+v0.8.0, 10/18, 2020
+
+- Basic functions are complete:
+    - single bootable ISO image with persistent partition
+    - Electrum can start mannually from terminal
+    - WiFi and networking are working (and persistent)
+- Basic firewall is set to deny all incoming traffic and restrict outgoing traffice
+- Support for optional fingerprint-protected secure drive
+- Use the latest Electrum v4.0.4
+- It is good enough for me (Jun) to put my money on it!!!
