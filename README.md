@@ -68,6 +68,9 @@ Running
 - git clone https://github.com/monkey-jsun/eroas.git
 - cd eroas
 - ./build_eroas.sh -
+- During the build you will be presented a few screens of choices.  Always choose the default, except for the followings
+    - "Configuring locales" screen #1 : select "end_US ISO-8859-1" and "en_US.UTF-8 UTF-8"
+    - "Configuring locales" screen #2 : select "C.UTF-8"
 
 ### TODO
 
