@@ -54,9 +54,10 @@ Running
 
 ### Flash usb disk
 
+- We recommend using USB 3.0 or above drive for fast speed.
 - We recomment Etcher (https://www.balena.io/etcher/), which runs on Mac, Windows and Linux
-- For windows, one can also use rufus.  Please use all default options and "dd" method to do the flahsing.
-- For Linux, one can simply use dd command (e.g., "dd if=eroas-v0.8.0-20201018-152032.iso of=/dev/sdb bs=4M")
+    - For windows, one can also use rufus.  Please use all default options and "dd" method to do the flahsing.
+    - For Linux, one can simply use dd command (e.g., "dd if=eroas-v0.8.0-20201018-152032.iso of=/dev/sdb bs=4M")
 - To flush into fingerprint-protected secure drive, please press your finger and unlock secure dirve first.
     - Please do not install EROAS into both public and secure drive.  The persistent data partition will get mixed up.  
 
@@ -68,6 +69,9 @@ Running
 - git clone https://github.com/monkey-jsun/eroas.git
 - cd eroas
 - ./build_eroas.sh -
+- During the build you will be presented a few screens of choices.  Always choose the default, except for the followings
+    - "Configuring locales" screen #1 : select "end_US ISO-8859-1" and "en_US.UTF-8 UTF-8"
+    - "Configuring locales" screen #2 : select "C.UTF-8"
 
 ### TODO
 
