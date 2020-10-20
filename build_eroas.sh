@@ -10,7 +10,7 @@ CHROOT_DIR=$SCRIPT_DIR/chroot
 
 CMD=(setup_host debootstrap run_chroot build_iso)
 
-VERSION="v0.8.0"
+VERSION="v0.8.0+"
 DATE=`TZ="UTC" date +"%y%m%d-%H%M%S"`
 
 function help() {
@@ -77,6 +77,7 @@ function run_chroot() {
     sudo mount --bind /run $CHROOT_DIR/run
 
     sudo ln -f $SCRIPT_DIR/chroot_build.sh $CHROOT_DIR/root/chroot_build.sh
+    sudo cp -f /etc/apt/sources.list $CHROOT_DIR/etc/apt/
     sudo chroot $CHROOT_DIR /root/chroot_build.sh -
     sudo rm -f $CHROOT_DIR/root/chroot_build.sh
 

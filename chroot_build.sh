@@ -63,17 +63,6 @@ function setup_host() {
 
     echo "EROAS" > /etc/hostname
 
-    cat <<EOF > /etc/apt/sources.list
-deb http://us.archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse
-deb-src http://us.archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse
-
-deb http://us.archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse
-deb-src http://us.archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse
-
-deb http://us.archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse
-deb-src http://us.archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse
-EOF
-
     # we need to install systemd first, to configure machine id
     apt-get update
     apt-get install -y libterm-readline-gnu-perl systemd-sysv
@@ -96,18 +85,19 @@ function install_wallet() {
     apt-get install -y python3-pyqt5 libsecp256k1-0 python3-cryptography python3-setuptools python3-pip
     pip3 install https://download.electrum.org/$ELECTRUM_VERSION/Electrum-$ELECTRUM_VERSION.tar.gz
 
-    # setup a basic firewall for now.
-    # I should not need the last "deny out 50002" rule. But otherwise
-    # first time up the outgoing traffic to 50002 still happens.
+    # setup a basic firewall for now, no incoming, only DNS and Tor outgoing.
+    # on AWS, IPV6 is not enabled and will barf if not disabled
+    sed -i -e "s#IPV6=yes#IPV6=no#" /etc/default/ufw
     ufw default deny incoming
     ufw default deny outgoing
-    ufw allow out 22
     ufw allow out 53
-    ufw allow out 80
-    ufw allow out 443
     ufw allow out 9001
+    # TODO: I should not need the last "deny out 50002" rule. 
+    # Still first time up the outgoing traffic to 50002 still happens.
     ufw deny out 50002
-    ufw enable
+
+    # enable on boot up, but not now for remote build
+    sed -i -e "s#ENABLED=no#ENABLED=yes#" /etc/ufw/ufw.conf
 }
 
 function install_pkg() {
@@ -143,6 +133,7 @@ function install_pkg_simple() {
     install_wallet
 
     # remove unneeded packages
+    apt-get remove -y cups
     apt-get autoremove -y
 
     # configure pkgs
