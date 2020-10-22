@@ -45,6 +45,22 @@ function find_index() {
     help "Command not found : $1"
 }
 
+function chroot_enter_setup() {
+    sudo mount --bind /dev chroot/dev
+    sudo mount --bind /run chroot/run
+    sudo chroot chroot mount none -t proc /proc
+    sudo chroot chroot mount none -t sysfs /sys
+    sudo chroot chroot mount none -t devpts /dev/pts
+}
+
+function chroot_exit_teardown() {
+    sudo chroot chroot umount /proc
+    sudo chroot chroot umount /sys
+    sudo chroot chroot umount /dev/pts
+    sudo umount chroot/dev
+    sudo umount chroot/run
+}
+
 function check_host() {
     local os_ver;
     os_ver=`lsb_release -d | grep "Ubuntu 20.04"`
@@ -72,20 +88,21 @@ function debootstrap() {
 
 function run_chroot() {
     echo "=====> running run_chroot ..."
-    sudo mount --bind /dev chroot/dev
-    sudo mount --bind /run chroot/run
+
+    chroot_enter_setup
 
     sudo ln -f $SCRIPT_DIR/chroot_build.sh chroot/root/chroot_build.sh
     sudo cp -f /etc/apt/sources.list chroot/etc/apt/
     sudo chroot chroot /root/chroot_build.sh -
     sudo rm -f chroot/root/chroot_build.sh
 
-    sudo umount chroot/dev
-    sudo umount chroot/run
+    chroot_exit_teardown
 }
 
 function fixup() {
     echo "=====> running fixup ..."
+
+    chroot_enter_setup
 
     # apply patches
     for pp in assets/*.patch; do
@@ -94,9 +111,9 @@ function fixup() {
     done
 
     # update initramfs
-    sudo mount -t proc none chroot/proc
     sudo chroot chroot update-initramfs -u
-    sudo umount chroot/proc
+
+    chroot_exit_teardown
 }
 
 function build_iso() {

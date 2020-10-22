@@ -56,9 +56,6 @@ function check_host() {
 
 function setup_host() {
     echo "=====> running setup_host ..."
-    mount none -t proc /proc
-    mount none -t sysfs /sys
-    mount none -t devpts /dev/pts
 
     echo "EROAS" > /etc/hostname
 
@@ -242,10 +239,6 @@ function finish_up() {
     dpkg-divert --rename --remove /sbin/initctl
 
     rm -rf /tmp/* ~/.bash_history
-
-    umount /proc
-    umount /sys
-    umount /dev/pts
 }
 
 # =============   main  ================
