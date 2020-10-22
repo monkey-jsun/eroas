@@ -8,7 +8,6 @@ set -u                  # treat unset variable as error
 ELECTRUM_VERSION="4.0.4"
 
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-CHROOT_DIR=$SCRIPT_DIR/chroot
 
 CMD=(setup_host install_pkg finish_up)
 

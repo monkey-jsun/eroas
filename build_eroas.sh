@@ -6,7 +6,6 @@ set -u                  # treat unset variable as error
 #set -x
 
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-CHROOT_DIR=$SCRIPT_DIR/chroot
 
 CMD=(setup_host debootstrap run_chroot fixup build_iso)
 
@@ -63,26 +62,26 @@ function setup_host() {
     echo "=====> running setup_host ..."
     sudo apt update
     sudo apt install -y binutils debootstrap squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin mtools
-    sudo mkdir -p $CHROOT_DIR
+    sudo mkdir -p chroot
 }
 
 function debootstrap() {
     echo "=====> running debootstrap ... will take a couple of minutes ..."
-    sudo debootstrap  --arch=amd64 --variant=minbase focal $CHROOT_DIR  http://us.archive.ubuntu.com/ubuntu/
+    sudo debootstrap  --arch=amd64 --variant=minbase focal chroot  http://us.archive.ubuntu.com/ubuntu/
 }
 
 function run_chroot() {
     echo "=====> running run_chroot ..."
-    sudo mount --bind /dev $CHROOT_DIR/dev
-    sudo mount --bind /run $CHROOT_DIR/run
+    sudo mount --bind /dev chroot/dev
+    sudo mount --bind /run chroot/run
 
-    sudo ln -f $SCRIPT_DIR/chroot_build.sh $CHROOT_DIR/root/chroot_build.sh
-    sudo cp -f /etc/apt/sources.list $CHROOT_DIR/etc/apt/
-    sudo chroot $CHROOT_DIR /root/chroot_build.sh -
-    sudo rm -f $CHROOT_DIR/root/chroot_build.sh
+    sudo ln -f $SCRIPT_DIR/chroot_build.sh chroot/root/chroot_build.sh
+    sudo cp -f /etc/apt/sources.list chroot/etc/apt/
+    sudo chroot chroot /root/chroot_build.sh -
+    sudo rm -f chroot/root/chroot_build.sh
 
-    sudo umount $CHROOT_DIR/dev
-    sudo umount $CHROOT_DIR/run
+    sudo umount chroot/dev
+    sudo umount chroot/run
 }
 
 function fixup() {
@@ -95,9 +94,9 @@ function fixup() {
     done
 
     # update initramfs
-    sudo mount -t proc none $CHROOT_DIR/proc
-    sudo chroot $CHROOT_DIR update-initramfs -u
-    sudo umount $CHROOT_DIR/proc
+    sudo mount -t proc none chroot/proc
+    sudo chroot chroot update-initramfs -u
+    sudo umount chroot/proc
 }
 
 function build_iso() {
