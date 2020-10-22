@@ -8,7 +8,7 @@ set -u                  # treat unset variable as error
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 CHROOT_DIR=$SCRIPT_DIR/chroot
 
-CMD=(setup_host debootstrap run_chroot build_iso)
+CMD=(setup_host debootstrap run_chroot fixup build_iso)
 
 VERSION="v0.8.0+"
 DATE=`TZ="UTC" date +"%y%m%d-%H%M%S"`
@@ -85,6 +85,21 @@ function run_chroot() {
     sudo umount $CHROOT_DIR/run
 }
 
+function fixup() {
+    echo "=====> running fixup ..."
+
+    # apply patches
+    for pp in assets/*.patch; do
+        echo applying patch $pp
+        sudo patch -p0 < $pp
+    done
+
+    # update initramfs
+    sudo mount -t proc none $CHROOT_DIR/proc
+    sudo chroot $CHROOT_DIR update-initramfs -u
+    sudo umount $CHROOT_DIR/proc
+}
+
 function build_iso() {
     echo "=====> running build_iso ..."
 
@@ -150,7 +165,7 @@ EOF
 EOF
 
     # create iso image
-    cd $SCRIPT_DIR/image
+    pushd $SCRIPT_DIR/image
     grub-mkstandalone \
         --format=x86_64-efi \
         --output=isolinux/bootx64.efi \
@@ -202,9 +217,14 @@ EOF
            "/EFI/efiboot.img=isolinux/efiboot.img" \
            "/boot/grub/bios.img=isolinux/bios.img" \
            "."
+
+    popd
 }
 
 # =============   main  ================
+
+# we always stay in $SCRIPT_DIR
+cd $SCRIPT_DIR
 
 check_host
 

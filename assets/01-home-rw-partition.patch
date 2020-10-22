@@ -1,0 +1,14 @@
+diff -Nru chroot/usr/share/initramfs-tools/scripts/casper-helpers.orig chroot/usr/share/initramfs-tools/scripts/casper-helpers
+--- chroot/usr/share/initramfs-tools/scripts/casper-helpers.orig	2020-10-21 20:09:08.714542488 -0700
++++ chroot/usr/share/initramfs-tools/scripts/casper-helpers	2020-10-21 21:16:47.486258899 -0700
+@@ -300,7 +300,9 @@
+     echo "start=$start" | sfdisk --no-reread -q $DEVICE -a || return
+     for d in ${DEVICE}$newpartno ${DEVICE}p$newpartno ${DEVICE}-part$newpartno; do
+         if [ -e $d ]; then
+-            mkfs.ext4 -q -L "$(root_persistence_label)" -F $d
++            # [eroas] create "home-rw" partition instead for better security
++            # mkfs.ext4 -q -L "$(root_persistence_label)" -F $d
++            mkfs.ext4 -q -L "home-rw" -F $d
+             break
+         fi
+     done
