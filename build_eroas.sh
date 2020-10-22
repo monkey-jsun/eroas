@@ -110,7 +110,12 @@ function fixup() {
         sudo patch -p0 < $pp
     done
 
-    # update initramfs
+    # make NetworkManager/wifi settings persistent
+    sudo cp assets/eroas.service chroot/etc/systemd/system/
+    sudo cp assets/eroas_setup.sh chroot/usr/sbin/
+    sudo chroot chroot systemctl enable eroas
+
+    # lastly update initramfs, since we changed some casper scripts
     sudo chroot chroot update-initramfs -u
 
     chroot_exit_teardown
