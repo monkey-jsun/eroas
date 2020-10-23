@@ -9,8 +9,16 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 CMD=(setup_host debootstrap run_chroot fixup build_iso)
 
-VERSION="v0.9.0"
+VERSION="v0.8.0+"
 DATE=`TZ="UTC" date +"%y%m%d-%H%M%S"`
+
+DEV=${DEV:-0}
+if [[ $DEV != 0 ]]; then 
+    echo "=====> eroas development build"
+    VERSION=${VERSION}_dev
+else
+    echo "=====> EROAS production build"
+fi
 
 function help() {
     # if $1 is set, use $1 as headline message in help()
@@ -105,10 +113,13 @@ function fixup() {
     chroot_enter_setup
 
     # apply patches
-    for pp in assets/*.patch; do
-        echo applying patch $pp
-        sudo patch -p0 < $pp
-    done
+    if [[ $DEV == 0 ]]; then
+        # create "home-rw" instead "writable" partition
+        sudo patch -p0 < assets/01-home-rw-partition.patch
+        # remove sudoers.d/casper; we still need to remove ubuntu
+        # from sudo/adm group during runtime (eroas.service)
+        sudo patch -p0 < assets/02-remove-ubuntu-sudoer.patch
+    fi
 
     # make NetworkManager/wifi settings persistent
     sudo cp assets/eroas.service chroot/etc/systemd/system/

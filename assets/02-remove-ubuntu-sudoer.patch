@@ -1,0 +1,14 @@
+diff -Nru chroot/usr/share/initramfs-tools/scripts/casper-bottom/25adduser.orig chroot/usr/share/initramfs-tools/scripts/casper-bottom/25adduser
+--- chroot/usr/share/initramfs-tools/scripts/casper-bottom/25adduser.orig	2020-10-23 09:56:16.715886590 -0700
++++ chroot/usr/share/initramfs-tools/scripts/casper-bottom/25adduser	2020-10-23 09:56:25.699958413 -0700
+@@ -72,10 +72,6 @@
+     passwd/user-password passwd/user-password-again \
+     passwd/user-fullname passwd/username passwd/user-uid
+ 
+-if [ -d /root/etc/sudoers.d/ ]; then
+-    echo "${USERNAME}  ALL=(ALL) NOPASSWD: ALL" > /root/etc/sudoers.d/casper
+-fi
+-
+ LTS="$(cut -d' ' -f3 /root/cdrom/.disk/info 2>/dev/null)" || LTS=
+ RELEASE="$(cut -d' ' -f1-2 /root/cdrom/.disk/info 2>/dev/null | sed 's/-/ /')" || RELEASE=
+ if [ "$LTS" = "LTS" ] && [ -n "$RELEASE" ]; then
