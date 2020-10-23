@@ -14,7 +14,7 @@ set -u
 #set -x
 
 # for now we start in Tor mode only
-nohup electrum -p sock5:localhost:9050 > /dev/null 2>&1 &
+nohup electrum -p 127.0.0.1:9050 > /dev/null 2>&1 &
 exit 0
 
 EROAS_CONFIG=/home/ubuntu/.eroas_config
