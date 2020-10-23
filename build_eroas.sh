@@ -9,7 +9,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 CMD=(setup_host debootstrap run_chroot fixup build_iso)
 
-VERSION="v0.8.0+"
+VERSION="v0.9.0"
 DATE=`TZ="UTC" date +"%y%m%d-%H%M%S"`
 
 function help() {
@@ -115,6 +115,12 @@ function fixup() {
     sudo cp assets/eroas_setup.sh chroot/usr/sbin/
     sudo chroot chroot systemctl enable eroas
 
+    # make electrum start automatically
+    sudo mkdir -p chroot/etc/skel/.local/bin
+    sudo cp assets/start_electrum.sh chroot/etc/skel/.local/bin
+    sudo mkdir -p chroot/etc/skel/.config/autostart
+    sudo cp assets/electrum.desktop chroot/etc/skel/.config/autostart
+
     # lastly update initramfs, since we changed some casper scripts
     sudo chroot chroot update-initramfs -u
 
@@ -143,7 +149,7 @@ set default="0"
 set timeout=30
 
 menuentry "Run EROAS (Electrum Running On A Stick)" {
-   linux /casper/vmlinuz boot=casper persistent toram splash noprompt fsck.mode=skip ---
+   linux /casper/vmlinuz boot=casper persistent splash noprompt fsck.mode=skip ---
    initrd /casper/initrd
 }
 
@@ -156,6 +162,8 @@ EOF
 # options
 #   noprompt - don't ask to eject media on reboot/shutdown
 #   fsck.mode=skip - skip initial media integrity checking
+#   toram - copy RO data to ram first before execution so that we can remount
+#       ro disk/partitions (?) and maybe run faster later
 # original option
 #   linux /casper/vmlinuz boot=casper nopersistent toram quiet splash ---
 
