@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Electrum Wallet
+Comment=The best open source bitcoin wallet
+Exec=/usr/local/bin/electrum -p 127.0.0.1:9050
+Icon=/home/ubuntu/.local/share/electrum-logo-128px.png
+Path=/home/ubuntu
+Terminal=false
+StartupNotify=true

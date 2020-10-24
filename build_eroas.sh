@@ -135,11 +135,14 @@ function fixup() {
     sudo cp assets/eroas_setup.sh chroot/usr/sbin/
     sudo chroot chroot systemctl enable eroas
 
-    # make electrum start automatically
-    sudo mkdir -p chroot/etc/skel/.local/bin
-    sudo cp assets/start_electrum.sh chroot/etc/skel/.local/bin
-    sudo mkdir -p chroot/etc/skel/.config/autostart
-    sudo cp assets/electrum.desktop chroot/etc/skel/.config/autostart
+    # make electrum an launcher icon on desktop
+    sudo mkdir -p chroot/etc/skel/.local/share
+    sudo cp assets/electrum-logo-128px.png chroot/etc/skel/.local/share
+    sudo mkdir -p chroot/etc/skel/Desktop
+    sudo cp assets/Electrum.desktop chroot/etc/skel/Desktop
+
+    # change desktop background to our own
+    sudo cp assets/eroas-desktop-wallpaper.png chroot/usr/share/backgrounds/xfce/xfce-stripes.png
 
     # lastly update initramfs, since we changed some casper scripts
     sudo chroot chroot update-initramfs -u
