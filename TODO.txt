@@ -1,0 +1,9 @@
+- add "EROAS Data" partition (fat32) to transfer data in/out
+- auto-start electrum (maybe not??)
+- add crypto FS to the persistent data partition
+- limit the ability to override system files and become truely immutable - any
+    more we can do in addition ubunt not root and home-rw?
+- support designated electrum server mode
+    - start electrum differently accordingly to the mode
+    - add additional firewall rules for designated server mode
+- BUG : each time reboot, we have a new pulseaudio profile
