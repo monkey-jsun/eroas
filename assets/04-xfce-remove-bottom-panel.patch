@@ -1,0 +1,34 @@
+diff -Nru chroot/etc/xdg/xfce4/panel/default.xml.orig chroot/etc/xdg/xfce4/panel/default.xml
+--- chroot/etc/xdg/xfce4/panel/default.xml.orig	2020-10-24 14:30:20.452561804 -0700
++++ chroot/etc/xdg/xfce4/panel/default.xml	2020-10-24 14:30:37.384594741 -0700
+@@ -4,7 +4,6 @@
+   <property name="configver" type="int" value="2"/>
+   <property name="panels" type="array">
+     <value type="int" value="1"/>
+-    <value type="int" value="2"/>
+     <property name="panel-1" type="empty">
+       <property name="position" type="string" value="p=6;x=0;y=0"/>
+       <property name="length" type="uint" value="100"/>
+@@ -28,22 +27,6 @@
+         <value type="int" value="14"/>
+       </property>
+     </property>
+-    <property name="panel-2" type="empty">
+-      <property name="autohide-behavior" type="uint" value="1"/>
+-      <property name="position" type="string" value="p=10;x=0;y=0"/>
+-      <property name="position-locked" type="bool" value="true"/>
+-      <property name="size" type="uint" value="48"/>
+-      <property name="plugin-ids" type="array">
+-        <value type="int" value="15"/>
+-        <value type="int" value="16"/>
+-        <value type="int" value="17"/>
+-        <value type="int" value="18"/>
+-        <value type="int" value="19"/>
+-        <value type="int" value="20"/>
+-        <value type="int" value="21"/>
+-        <value type="int" value="22"/>
+-      </property>
+-    </property>
+   </property>
+   <property name="plugins" type="empty">
+     <property name="plugin-1" type="string" value="applicationsmenu"/>

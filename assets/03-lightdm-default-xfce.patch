@@ -1,0 +1,11 @@
+diff -Nru chroot/usr/share/initramfs-tools/scripts/casper-bottom/15autologin.orig chroot/usr/share/initramfs-tools/scripts/casper-bottom/15autologin
+--- chroot/usr/share/initramfs-tools/scripts/casper-bottom/15autologin.orig	2020-10-24 14:04:54.640814378 -0700
++++ chroot/usr/share/initramfs-tools/scripts/casper-bottom/15autologin	2020-10-24 14:05:23.152841334 -0700
+@@ -63,6 +63,7 @@
+     # Configure LightDM autologin
+     LightDMCustomFile=/root/etc/lightdm/lightdm.conf
+     AutologinParameters="allow-guest=false\n\
++user-session=xfce\n\
+ autologin-guest=false\n\
+ autologin-user=$USERNAME\n\
+ autologin-user-timeout=0"

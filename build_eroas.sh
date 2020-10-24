@@ -15,7 +15,7 @@ DATE=`TZ="UTC" date +"%y%m%d-%H%M%S"`
 DEV=${DEV:-0}
 if [[ $DEV != 0 ]]; then 
     echo "=====> eroas development build"
-    VERSION=${VERSION}_dev
+    VERSION=${VERSION}-dev
 else
     echo "=====> EROAS production build"
 fi
@@ -112,14 +112,23 @@ function fixup() {
 
     chroot_enter_setup
 
-    # apply patches
+    # create "home-rw" instead "writable" partition
+    sudo patch -p0 < assets/01-home-rw-partition.patch
+
+
+    # remove sudoers.d/casper; we still need to remove ubuntu
+    # from sudo/adm group during runtime (eroas.service)
+    # only do this for production build
     if [[ $DEV == 0 ]]; then
-        # create "home-rw" instead "writable" partition
-        sudo patch -p0 < assets/01-home-rw-partition.patch
-        # remove sudoers.d/casper; we still need to remove ubuntu
-        # from sudo/adm group during runtime (eroas.service)
         sudo patch -p0 < assets/02-remove-ubuntu-sudoer.patch
     fi
+
+    # make lightdm use xfce session as default.  Otherwise we will
+    # gnome shell instead
+    sudo patch -p0 < assets/03-lightdm-default-xfce.patch
+
+    # remove xfce bottom panel.  Annonying. Most icons are broken anyway.
+    sudo patch -p0 < assets/04-xfce-remove-bottom-panel.patch
 
     # make NetworkManager/wifi settings persistent
     sudo cp assets/eroas.service chroot/etc/systemd/system/
@@ -157,7 +166,7 @@ search --set=root --file /ubuntu
 insmod all_video
 
 set default="0"
-set timeout=30
+set timeout=10
 
 menuentry "Run EROAS (Electrum Running On A Stick)" {
    linux /casper/vmlinuz boot=casper persistent splash noprompt fsck.mode=skip ---
