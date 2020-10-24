@@ -87,6 +87,7 @@ function install_wallet() {
     ufw default deny incoming
     ufw default deny outgoing
     ufw allow out 53
+    ufw allow out 443
     ufw allow out 9001
     # TODO: I should not need the last "deny out 50002" rule. 
     # Still first time up the outgoing traffic to 50002 still happens.
