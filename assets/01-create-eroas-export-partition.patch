@@ -1,0 +1,30 @@
+diff -Nru chroot/usr/share/initramfs-tools/scripts/casper-helpers.orig chroot/usr/share/initramfs-tools/scripts/casper-helpers
+--- chroot/usr/share/initramfs-tools/scripts/casper-helpers.orig	2020-10-25 12:20:26.199614838 -0700
++++ chroot/usr/share/initramfs-tools/scripts/casper-helpers	2020-10-25 12:49:04.228224926 -0700
+@@ -297,10 +297,13 @@
+     if [ $((size - start*sectorsize)) -lt $((100*1024*1024)) ]; then
+         return
+     fi
+-    echo "start=$start" | sfdisk --no-reread -q $DEVICE -a || return
++    echo "start=$start,type=c" | sfdisk --no-reread -q $DEVICE -a || return
+     for d in ${DEVICE}$newpartno ${DEVICE}p$newpartno ${DEVICE}-part$newpartno; do
+         if [ -e $d ]; then
+-            mkfs.ext4 -q -L "$(root_persistence_label)" -F $d
++            # [jsun] create fat32 for data import/export
++            # Note we are attaching "home-rw" partition to ISO already
++            # And there will be no "writable" in the whole system
++            mkfs.fat -F 32 -n "EroasExport" $d
+             break
+         fi
+     done
+diff -Nru chroot/usr/share/initramfs-tools/hooks/casper.orig chroot/usr/share/initramfs-tools/hooks/casper
+--- chroot/usr/share/initramfs-tools/hooks/casper.orig	2020-10-25 13:34:11.969859041 -0700
++++ chroot/usr/share/initramfs-tools/hooks/casper	2020-10-25 13:35:36.142734101 -0700
+@@ -23,6 +23,7 @@
+ # We need losetup, mkfs.ext4 & sfdisk
+ copy_exec /sbin/losetup /sbin
+ copy_exec /sbin/mkfs.ext4 /sbin
++copy_exec /sbin/mkfs.fat /sbin
+ copy_exec /sbin/sfdisk /sbin
+ 
+ # Casper hooks

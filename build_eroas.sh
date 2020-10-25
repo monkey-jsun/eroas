@@ -9,7 +9,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 CMD=(setup_host debootstrap run_chroot fixup build_iso)
 
-VERSION="v0.9.0"
+VERSION="v0.9.0+"
 DATE=`TZ="UTC" date +"%y%m%d-%H%M%S"`
 
 DEV=${DEV:-0}
@@ -112,8 +112,9 @@ function fixup() {
 
     chroot_enter_setup
 
-    # create "home-rw" instead "writable" partition
-    sudo patch -p0 < assets/01-home-rw-partition.patch
+    # create "EroasExport" FAT32 instead "writable" partition
+    # we have attached 100MB "home-rw" partition in ISO already for persistency
+    sudo patch -p0 < assets/01-create-eroas-export-partition.patch
 
 
     # remove sudoers.d/casper; we still need to remove ubuntu
@@ -233,6 +234,13 @@ EOF
         LC_CTYPE=C mcopy -i efiboot.img ./bootx64.efi ::efi/boot/
     )
 
+    (
+        cd isolinux && \
+        dd if=/dev/zero of=home-rw.img bs=1M count=100 && \
+        mkfs.ext4 home-rw.img && \
+        tune2fs -L home-rw home-rw.img 
+    )
+
     grub-mkstandalone \
         --format=i386-pc \
         --output=isolinux/core.img \
@@ -262,6 +270,7 @@ EOF
         -e EFI/efiboot.img \
         -no-emul-boot \
         -append_partition 2 0xef isolinux/efiboot.img \
+        -append_partition 3 0x83 isolinux/home-rw.img \
         -output "../eroas-$VERSION-$DATE.iso" \
         -m "isolinux/efiboot.img" \
         -m "isolinux/bios.img" \
