@@ -1,3 +1,13 @@
+===================
+v0.9.0, 10/24, 2020
+
+- Remove default user sudoer priviledge.  No root or sudoer in the whole system.
+- Restrict persistency to /home directory only. Now system is considered immutable.
+- Support faster remote build from cloud server (e.g., AWS)
+- Support and enforce using Tor to connect to Electrum servers
+- Switch to xfce session with semi-custom background.
+
+===================
 v0.8.0, 10/18, 2020
 
 - Basic functions are complete:
