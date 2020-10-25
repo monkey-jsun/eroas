@@ -80,6 +80,9 @@ function install_wallet() {
     cd $HOME
     apt-get install -y python3-pyqt5 libsecp256k1-0 python3-cryptography python3-setuptools python3-pip
     pip3 install https://download.electrum.org/$ELECTRUM_VERSION/Electrum-$ELECTRUM_VERSION.tar.gz
+    
+    # strange, we suddenly need this package on 10/24, 2020
+    pip3 install typing_extensions
 
     # setup a basic firewall for now, no incoming, only DNS and Tor outgoing.
     # on AWS, IPV6 is not enabled and will barf if not disabled
