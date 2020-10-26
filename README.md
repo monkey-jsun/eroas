@@ -6,18 +6,6 @@ with cold-wallet level security and warm-wallet like convenience.
 It is meant to operate like a saving account for infrequent transactions (<1 transaction per day).
 Its strong security level makes it suitable to protect assets over millions of dollars.
 
-### Use EROAS
-
-- Insert EROAS USB drive into PC/MacBook and boot from USB drive.
-  Different machines have different methods for this step.  See wiki page. (TODO)
-- First time booting up, you may need to set up wifi connection.  On the top right corner, click an icon with 2 arrows.  You only need to do this once for each new wifi network.
-- Click on the Electrum launcher icon on Desktop to run Electrum. 
-    Select "Auto connect" option when prompted for the first time running.
-- Follow Electrum GUI to set up your wallets and perform transactions accordingly
-- Afterwards shut down the machine and unplug the USB drive.
-
-Note, since we are using Tor networking, it might take up to 1 minute for Electrum to make a connection to Electrum open network.
-
 ### Networking modes:
 
 Curently we only support using Tor to connect to open Electrum netowrk.
@@ -42,19 +30,32 @@ Strict firewall is implemented:
 - Use general purposed and open architecture hardware (PC/Mac/USB disks).  No proprietary code or hardware.
 - support both Mac and PC
 
-
 ### Flash USB drive
 
-We recommend using USB 3.0 or above drive for fast speed.  
-You can also use fingerprint-protected or keypad protected USB drives for addtional security. 
-
+- Get a spare USB drive with 2GB or bigger.
+    - Backup exiting data as they will be wiped away.
+    - USB 3.0 or above drive is strongly recommended for fast run-time speed.  
+    - You can also look into fingerprint-protected or keypad protected USB drives for addtional security. 
 - (optional) Build EROAS ISO image from scratch. (See below).
 - Or download [the latest EROAS ISO image](http://junsun.net/misc/latest-eroas.html)
-- We recomment using [Etcher](https://www.balena.io/etcher/) for flushing.  It runs on Mac, Windows and Linux.
+- Download/install [Etcher](https://www.balena.io/etcher/) and use it to flush the ISO image to USB drive.
+    - Etcher runs on Mac, Windows and Linux.
     - For windows, one can also use rufus.  Please use all default options and "dd" method to do the flashing.
     - For Linux, one can simply use dd command (e.g., "dd if=eroas-v0.8.0-20201018-152032.iso of=/dev/sdb bs=4M")
 - To flush into fingerprint-protected secure drive, please use your finger to unlock secure dirve first.
     - Please do not install EROAS into both public and secure drive.  The persistent data partition will get mixed up.  
+
+### Use EROAS
+
+- Insert EROAS USB drive into PC/MacBook and boot from USB drive.
+  Different machines have different methods for this step.  See wiki page. (TODO)
+- First time booting up, you may need to set up wifi connection.  On the top right corner, click an icon with 2 arrows.  You only need to do this once for each new wifi network.
+- Click on the Electrum launcher icon on Desktop to run Electrum. 
+    Select "Auto connect" option when prompted for the first time running.
+- Follow Electrum GUI to set up your wallets and perform transactions accordingly
+- Afterwards shut down the machine and unplug the USB drive.
+
+Note - because we are using Tor networking with a very strict firewall, it might take up to 1 minute for Electrum to make an initial connection to Electrum network.
 
 ### Build ISO image
 
