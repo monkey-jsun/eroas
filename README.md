@@ -36,13 +36,13 @@ Strict firewall is implemented:
     - Backup exiting data as they will be wiped away.
     - USB 3.0 or above drive is strongly recommended for fast run-time speed.  
     - You can also look into fingerprint-protected or keypad protected USB drives for addtional security. 
-- (optional) Build EROAS ISO image from scratch. (See below).
-- Or download [the latest EROAS ISO image](http://junsun.net/misc/latest-eroas.html)
+- Download [the latest EROAS ISO image](http://junsun.net/misc/latest-eroas.html)
+    - Optionally you can build EROAS ISO image yourself relatively easily. See Instructions below.
 - Download/install [Etcher](https://www.balena.io/etcher/) and use it to flush the ISO image to USB drive.
     - Etcher runs on Mac, Windows and Linux.
-    - For windows, one can also use rufus.  Please use all default options and "dd" method to do the flashing.
-    - For Linux, one can simply use dd command (e.g., "dd if=eroas-v0.8.0-20201018-152032.iso of=/dev/sdb bs=4M")
-- To flush into fingerprint-protected secure drive, please use your finger to unlock secure dirve first.
+    - Windows users can also use rufus.  Please use all default options and "dd" method to do the flashing.
+    - Linux users can simply use dd command (e.g., "sudo dd if=eroas-v0.8.0-20201018-152032.iso of=/dev/sdb bs=4M")
+- To flush into fingerprint-protected secure drive, use your finger to unlock secure dirve first.  Select the secure drive as the flushing target.
     - Please do not install EROAS into both public and secure drive.  The persistent data partition will get mixed up.  
 
 ### Use EROAS
