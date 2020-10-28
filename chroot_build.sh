@@ -75,7 +75,7 @@ function setup_host() {
 function install_wallet() {
     echo "=====> running install_wallet ..."
     apt-get install -y tor
-    apt-get install -y cryptsetup
+    apt-get install -y cryptmount
 
     cd $HOME
     apt-get install -y python3-pyqt5 libsecp256k1-0 python3-cryptography python3-setuptools python3-pip
