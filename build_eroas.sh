@@ -136,7 +136,7 @@ function fixup() {
 
     # make NetworkManager/wifi settings persistent
     sudo cp assets/eroas.service chroot/etc/systemd/system/
-    sudo cp assets/eroas_setup.sh chroot/usr/sbin/
+    sudo cp assets/eroas_system_setup.sh chroot/usr/local/sbin/
     sudo chroot chroot systemctl enable eroas
 
     # setup crypto mount

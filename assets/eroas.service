@@ -1,13 +1,12 @@
 [Unit]
-Description=EROAS setup
+Description=EROAS system level setup
 After=graphical.target
 
 [Service]
 #ExecStartPre=/usr/bin/sleep 60
-ExecStart=/usr/sbin/eroas_setup.sh
+ExecStart=/usr/local/sbin/eroas_system_setup.sh
 Type=idle
 # idle ensures we run last 
 
 [Install]
 WantedBy=graphical.target
-
