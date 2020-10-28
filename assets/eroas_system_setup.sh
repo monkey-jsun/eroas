@@ -17,7 +17,7 @@ sed -i "s#adm:x:4:ubuntu#adm:x:4:#" /etc/group
 sed -i "s#sudo:x:27:ubuntu#sudo:x:27:#" /etc/group
 
 # check crypto fs
-if [[ -f /home/ubuntu/.config/eroas/eroas_crypto_fs.bin ]]; then
+if [[ -f /home/eroas_crypto_fs.bin ]]; then
     exit 0
 fi
 
@@ -40,7 +40,7 @@ eroas_crypto_fs
 ubuntu
 /home/ubuntu/.electrum
 128
-/home/ubuntu/.config/eroas/eroas_crypto_fs.bin
+/home/eroas_crypto_fs.bin
 /home/casper/eroas_crypto_fs.key
 yes
 EOF
