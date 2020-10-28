@@ -5,7 +5,8 @@ After=graphical.target
 [Service]
 #ExecStartPre=/usr/bin/sleep 60
 ExecStart=/usr/sbin/eroas_setup.sh
-Type=idle               # we run last 
+Type=idle
+# idle ensures we run last 
 
 [Install]
 WantedBy=graphical.target
