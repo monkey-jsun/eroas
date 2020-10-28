@@ -1,0 +1,29 @@
+diff -Nru chroot/usr/sbin/cryptmount-setup.orig chroot/usr/sbin/cryptmount-setup
+--- chroot/usr/sbin/cryptmount-setup.orig	2019-11-17 08:20:00.000000000 -0800
++++ chroot/usr/sbin/cryptmount-setup	2020-10-27 12:12:56.228078603 -0700
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ # simple setup script for cryptmount
+ # RW Penney, May 2007
+ 
+@@ -252,7 +252,8 @@
+ }
+ EOF
+     eval_gettext "Generating filesystem access key (\${key_file})..."; echo
+-    until  ${CM_BINEXE} --generate-key 32 "${TargetName}"; do
++    exec 10<<<"eroas"
++    until  ${CM_BINEXE} --generate-key 32 --passwd-fd 10 "${TargetName}"; do
+         cmerrno=$?
+         if [ ${cmerrno} -ne 33 ]; then
+             eval_gettext "Key-generation failure (status=${cmerrno})"
+@@ -260,7 +261,8 @@
+         fi
+     done
+     eval_gettext "Formatting encrypted filesystem..."; echo
+-    until ${CM_BINEXE} --prepare "${TargetName}"; do
++    exec 11<<<"eroas"
++    until ${CM_BINEXE} --prepare --passwd-fd 11 "${TargetName}"; do
+         cmerrno=$?
+         if [ ${cmerrno} -ne 21 ]; then
+             eval_gettext "Cannot prepare device (status=${cmerrno})"
