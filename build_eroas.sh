@@ -131,10 +131,17 @@ function fixup() {
     # remove xfce bottom panel.  Annonying. Most icons are broken anyway.
     sudo patch -p0 < assets/04-xfce-remove-bottom-panel.patch
 
+    # enable cryptmount-setup to run in script, using fixed password
+    sudo patch -p0 < assets/05-cryptmount-setup-run-in-script.patch
+
     # make NetworkManager/wifi settings persistent
     sudo cp assets/eroas.service chroot/etc/systemd/system/
     sudo cp assets/eroas_setup.sh chroot/usr/sbin/
     sudo chroot chroot systemctl enable eroas
+
+    # setup crypto mount
+    sudo cp chroot/etc/cryptmount/cmtab chroot/etc/cryptmount/cmtab.bckp-setup
+    sudo cp assets/cmtab chroot/etc/cryptmount/cmtab
 
     # make electrum an launcher icon on desktop
     sudo mkdir -p chroot/etc/skel/.local/share
@@ -236,7 +243,7 @@ EOF
 
     (
         cd isolinux && \
-        dd if=/dev/zero of=home-rw.img bs=1M count=100 && \
+        dd if=/dev/zero of=home-rw.img bs=1M count=256 && \
         mkfs.ext4 home-rw.img && \
         tune2fs -L home-rw home-rw.img 
     )
