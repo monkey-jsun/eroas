@@ -134,14 +134,20 @@ function fixup() {
     # enable cryptmount-setup to run in script, using fixed password
     sudo patch -p0 < assets/05-cryptmount-setup-run-in-script.patch
 
-    # make NetworkManager/wifi settings persistent
+    # make NetworkManager/wifi settings persistent; perform eroas system setup
     sudo cp assets/eroas.service chroot/etc/systemd/system/
     sudo cp assets/eroas_system_setup.sh chroot/usr/local/sbin/
     sudo chroot chroot systemctl enable eroas
 
+    # setup for eroas user setup
+    sudo mkdir -p chroot/etc/skel/.config/autostart
+    sudo cp assets/eroas_user_setup.desktop chroot/etc/skel/.config/autostart
+    sudo cp assets/eroas_user_setup.sh chroot/usr/local/bin
+
     # setup crypto mount
     sudo cp chroot/etc/cryptmount/cmtab chroot/etc/cryptmount/cmtab.bckp-setup
     sudo cp assets/cmtab chroot/etc/cryptmount/cmtab
+
 
     # make electrum an launcher icon on desktop
     sudo mkdir -p chroot/etc/skel/.local/share

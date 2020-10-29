@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0.0
+Type=Application
+Name=eroas user setup
+Exec=/usr/local/bin/eroas_user_setup.sh
+OnlyShowIn=XFCE;
+RunHook=0
+StartupNotify=false
+Terminal=true
+Hidden=false
+
