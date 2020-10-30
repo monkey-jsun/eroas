@@ -178,7 +178,7 @@ search --set=root --file /ubuntu
 insmod all_video
 
 set default="0"
-set timeout=10
+set timeout=1
 
 menuentry "Run EROAS (Electrum Running On A Stick)" {
    linux /casper/vmlinuz boot=casper persistent splash noprompt fsck.mode=skip ---
