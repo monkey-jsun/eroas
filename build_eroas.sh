@@ -139,19 +139,14 @@ function fixup() {
     sudo cp assets/eroas_system_setup.sh chroot/usr/local/sbin/
     sudo chroot chroot systemctl enable eroas
 
-    # setup for eroas user setup
-    sudo mkdir -p chroot/etc/skel/.config/autostart
-    sudo cp assets/eroas_user_setup.desktop chroot/etc/skel/.config/autostart
-    sudo cp assets/eroas_user_setup.sh chroot/usr/local/bin
-
     # setup crypto mount
     sudo cp chroot/etc/cryptmount/cmtab chroot/etc/cryptmount/cmtab.bckp-setup
     sudo cp assets/cmtab chroot/etc/cryptmount/cmtab
 
 
     # make electrum an launcher icon on desktop
-    sudo mkdir -p chroot/etc/skel/.local/share
-    sudo cp assets/electrum-logo-128px.png chroot/etc/skel/.local/share
+    sudo cp assets/electrum-logo-128px.png chroot/usr/local/share
+    sudo cp assets/start_electrum.sh chroot/usr/local/bin
     sudo mkdir -p chroot/etc/skel/Desktop
     sudo cp assets/Electrum.desktop chroot/etc/skel/Desktop
 

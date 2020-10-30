@@ -1,119 +1,179 @@
 #!/bin/bash
 
-# TODO:
-#   convert server name to IP (we use IP only)
-#   trim input
-#   allow multiple ways for ssh
-#       private key 
-#       pem file
-#       password (is this possible for tunneling?)
+CONFIG_FILE=/home/ubuntu/.eroas_config
 
-set -e
-set -o pipefail
-set -u
-#set -x
+function quitting() {
+    for (( count=5; count > 0; count-=1 )); do
+        echo -n -e "\rClosing in $count seconds ...."
+        sleep 1
+    done
+    echo
+    echo
+    exit 1
+}
 
-# for now we start in Tor mode only
-nohup electrum -p 127.0.0.1:9050 > /dev/null 2>&1 &
-exit 0
+function myerror() {
+    echo -e "ERROR : $1"
+    echo
+    quitting
+}
 
-EROAS_CONFIG=/home/ubuntu/.eroas_config
-
+# ask user to input until we get expected reuslts
+#   $1 : prompt; 
+#   $2 : regex pattern
 function get_user_choice() {
-    echo -e "\n$1\n"
     while true; do
-        read -p "Please input your choice (default:$2) : " choice
-        if [[ $choice == '' ]]; then choice=$2; fi
-        if [[ $choice > $3 || $choice < 1 ]]; then
-            echo -e "Invalid choice.  Please try again."
-            continue;
-        fi
-        break;
+        read -p "$1" choice
+        choice=${choice,,} # tolower
+        if [[ $choice =~ $2 ]]; then return; fi
+        echo -e "\nUnexpected input.  Please try again.\n"
     done
 }
 
-function build_config_input() {
-    msg="
-EROAS supports 3 networking modes:
-
-  1. Use Tor to connect to open Electrum network servers (default).
-  2. Connect to designated Electrum server directly
-  3. Connect to designated Electrum server via SSH tunnel (advanced)
-"
-	get_user_choice "$msg" 1 3
-
-	if [[ $choice == 1 ]]; then
-        ELECTRUM_SERVER=
-        ELECTRUM_PORT=
-        SSH_SERVER=
-        SSH_PORT=
-        SSH_USER=
-        SSH_PASSWD=
-	elif [[ $choice == 2 ]]; then
-		read -p "Input electrum server name or IP address : " ELECTRUM_SERVER
-		read -p "Input electrum server port (default:50002) : " ELECTRUM_PORT
-        SSH_SERVER=
-        SSH_PORT=
-        SSH_USER=
-        SSH_PASSWD=
-    elif [[ $choice == 3 ]]; then
-        ELECTRUM_SERVER=localhost
-		read -p "Input ssh server name or IP address : " SSH_SERVER
-		read -p "Input ssh server port (default:22) : " SSH_PORT
-		read -p "Input ssh user login : " SSH_USER
-		read -p "Input ssh user password : " SSH_PASSWD
-		read -p "Input electrum server port (default:50002) : " ELECTRUM_PORT
-    fi
-
-    if [ -z $ELECTRUM_PORT ]; then ELECTRUM_PORT=50002; fi
-    if [ -z $SSH_PORT ]; then SSH_PORT=22; fi
-
-}
-
-function build_config() {
-    while true; do
-        build_config_input
-        if [[ $choice == 2 && -z ELECTRUM_SERVER ]]; then
-            echo "Electrum server name cannot be empty"
+#   support #-started comment line (no # in the middle)
+#   stripping white spaces at beginning and end and around "="
+#   don't support " " for quoting string
+#
+# $1 - file name ("config.tx")
+# $2 - a list of expected key words ("KEY1 KEY2 KEY3")
+function parse_config() {
+    echo "parsing config file $1 ..."
+    result=true
+    while read -r line
+    do
+        if [[ ! $line =~ .+=.* ]]; then
+            echo "illegal line : $line"
+            result=false
+            break
+        fi
+        if [[ $line =~ ^#.* ]]; then
+            echo "comment line; skipping ..."
             continue;
         fi
-        if [[ $choice == 3 ]]; then
-            if [[ -z $SSH_SERVER || -z $SSH_USER || -z $SSH_PASSWD ]]; then
-                echo SSH server/user/passwd cannot be empty
-                continue
-            fi
+        key=$(echo $line | sed -e "s#=.*\$##" | xargs)
+        value=$(echo $line | sed -e "s#^[^=]*=##" | xargs)
+        if [[ ! $key =~ ^[a-zA-Z][a-zA-Z0-9_]*$ ]]; then
+            echo "illegal key : $key"
+            result=false
+            break
         fi
-        break
-    done
+        if [[ ! $2 =~ (^|[[:space:]])"$key"($|[[:space:]]) ]]; then
+            echo "unexpected key, skipping : $key"
+            continue
+        fi
+        printf -v "${key}" '%s' "${value}"
+    done < "$1"
+}
 
-    cat << EOF > $EROAS_CONFIG
-ELECTRUM_SERVER=$ELECTRUM_SERVER
-ELECTRUM_PORT=$ELECTRUM_PORT
-SSH_SERVER=$SSH_SERVER
-SSH_PORT=$SSH_PORT
-SSH_USER=$SSH_USER
-SSH_PASSWD=$SSH_PASSWD
+
+# =============== setup ==================
+function setup_banner() {
+    cat << EOF
+
+        #############################################################
+        #                                                           #
+        #                 EROAS ONE-TIME SETUP                      #
+        #                                                           #
+        #############################################################
+
+Welcome! If you ever need to run one-time setup again, simply delete 
+the config file and restart Electrum wallet.
+
+The config file is at $CONFIG_FILE
+
 EOF
 }
 
-if [ ! -f $EROAS_CONFIG ]; then
-    build_config
+function setup_fs_password() {
+    cat << EOF
+
+=======> Crypto filesystem password
+
+EROAS uses a password-protected encrypted filesystem to store Electrum 
+wallet data files. You are strongly encouraged to customize the password, 
+especially if you are using a standard USB drive without fingerprint or
+keypad protection.
+
+EOF
+
+    get_user_choice "Customize filesystem password? (Y/n) " "^(y|n|)$"
+    if [[ -z $choice ]]; then choice="y"; fi
+
+    if [[ $choice == "n" ]]; then
+        CRYPTO_FS_PASSWORD=standard
+        return
+    fi
+
+    # change password
+    echo
+    echo "Enter 'eroas' below (default password), and then set up your new one"
+    echo
+    while true; do
+        cryptmount --change-password eroas_crypto_fs
+        if [[ $? == 0 ]]; then break; fi
+    done
+    CRYPTO_FS_PASSWORD=custom
+}
+
+function setup_save() {
+    echo "CRYPTO_FS_PASSWORD=$CRYPTO_FS_PASSWORD" > $CONFIG_FILE
+}
+
+function setup_config() {
+    setup_banner
+    setup_fs_password
+
+    setup_save
+
+    echo 
+    echo "=======> One-time setup is done!"
+    echo
+}
+
+# =============== main ==================
+
+# be paranoid, check crypt_fs readiness
+while [[ ! -f /home/eroas_crypto_fs.bin ]]; do
+    echo "Strange - waiting for crypto fs being ready ..."
+    sleep 2
+done
+
+# check for config file
+if [[ ! -f $CONFIG_FILE ]]; then
+    setup_config
 fi
 
-. $EROAS_CONFIG
+# parse config file
+parse_config "$CONFIG_FILE" "CRYPTO_FS_PASSWORD"
+if [[ $result != true ]]; then
+    myerror "parsing config file failed"
+fi
 
-if [ -z $ELECTRUM_SERVER ]; then
-    # use Tor to connect to open network
-    nohup electrum -p sock5:localhost:9050 > /dev/null 2>&1 &
-elif [ -z $SSH_SERVER ]; then
-    # direct connect to designated server
-    nohup electrum -1 -s $ELECTRUM_SERVER:$ELECTRUM_PORT:s > /dev/null 2>&1 &
-elif [[ $ELECTRUM_SERVER == "localhost" ]]; then
-    # SSH tunneling
-    nohup electrum -1 -s localhost:$ELECTRUM_PORT:s > /dev/null 2>&1 &
+# mount crypto fs
+
+# skip if crypto fs is already mounted
+if [[ $(mount | grep eroas_crypto_fs) ]]; then
+    echo "EROAS crypto filesystem is already mounted."
+elif [[ $CRYPTO_FS_PASSWORD == "custom" ]]; then
+    echo "Mounting EROAS crypto filesystem ... enter your password below."
+    while true; do
+        cryptmount eroas_crypto_fs
+        if [[ $? == 0 ]]; then break; fi
+    done
+elif [[ $CRYPTO_FS_PASSWORD == "standard" ]]; then
+    echo "Mounting EROAS crypto filesystem with standard password ..."
+    exec 10<<<"eroas"
+    cryptmount --passwd-fd 10 eroas_crypto_fs 
 else
-    echo "ERROR: SSH_SERVER($SSH_SERVER) is set but ELECTRUM_SERVER($ELECTRUM_SERVER) is not localhost"
-    echo "bail out ..."
-    sleep 5
+    myerror "Unexpected value for CRYPTO_FS_PASSWORD : $CRYPTO_FS_PASSWORD"
 fi
 
+echo
+echo "EROAS crypto filesystem is mounted. Starting Electrum ..."
+echo
+
+# start electrum. Use tor mode for now.
+nohup electrum -p 127.0.0.1:9050 > /dev/null 2>&1 &
+
+# delayed quitting is necessary because electrum need time to get started
+quitting
