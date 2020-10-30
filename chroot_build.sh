@@ -76,6 +76,7 @@ function install_wallet() {
     echo "=====> running install_wallet ..."
     apt-get install -y tor
     apt-get install -y cryptmount
+    apt-get install -y sshpass
 
     cd $HOME
     apt-get install -y python3-pyqt5 libsecp256k1-0 python3-cryptography python3-setuptools python3-pip
@@ -90,11 +91,6 @@ function install_wallet() {
     ufw default deny incoming
     ufw default deny outgoing
     ufw allow out 53
-    ufw allow out 443
-    ufw allow out 9001
-    # TODO: I should not need the last "deny out 50002" rule. 
-    # Still first time up the outgoing traffic to 50002 still happens.
-    ufw deny out 50002
 
     # enable on boot up, but not now for remote build
     sed -i -e "s#ENABLED=no#ENABLED=yes#" /etc/ufw/ufw.conf
