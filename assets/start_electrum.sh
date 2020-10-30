@@ -15,7 +15,9 @@ function quitting() {
 function myerror() {
     echo -e "ERROR : $1"
     echo
-    quitting
+
+    read -p "Press ENTER to close terminal." answer
+    exit 1
 }
 
 # ask user to input until we get expected reuslts
@@ -115,22 +117,170 @@ EOF
     CRYPTO_FS_PASSWORD=custom
 }
 
+function setup_network() {
+    cat << EOF
+
+=======> Networking setup
+
+EROAS supports 3 networking modes:
+
+    1. Use Tor to connect Electrum open servers (default)
+    2. Connect to dedicated Electrum server directly
+    3. Connect to dedicated Electrum server via SSH (advanced)
+
+EOF
+
+    get_user_choice "Which mode do you like? (1/2/3, default:1) " "^(1|2|3|)$"
+    if [[ -z $choice ]]; then choice="1"; fi
+    NETWORK_MODE=$choice
+
+    if [[ $NETWORK_MODE == 1 ]]; then
+        cat << EOF
+
+=======> Allow outgoing HTTP/HTTPS
+
+Allowing outgoing HTTP/HTTPS will shorten the initial network connection 
+time whne you start Electrum. It also enables certain convenience features
+such as fiat currency balance.  Disabling it gives better security.
+
+EOF
+
+        get_user_choice "Allow outgoing HTTP/HTTPS traffic? (Y/n) " "^(y|n|)$"
+        if [[ -z $choice ]]; then choice="y"; fi
+
+        NETWORK_HTTP=$choice
+    fi
+
+    if [[ $NETWORK_MODE == 2 || $NETWORK_MODE == 3 ]]; then
+        echo
+        echo "=======> Electrum server info"
+        echo
+
+        get_user_choice "Server IP address (NO domain name)? " "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$"
+        SERVER_IP=$choice
+
+        get_user_choice "Server port (default:50002)? " "^([0-9]{2,5}|)$"
+        if [[ -z $choice ]]; then 
+            SERVER_PORT=50002 
+        else 
+            SERVER_PORT=$choice
+        fi
+    fi
+
+    if [[ $NETWORK_MODE == 3 ]]; then
+        echo
+        echo "=======> SSH credential"
+        echo
+
+        get_user_choice "SSH port? (default:22) " "^([0-9]{2,5}|)$"
+        if [[ -z $choice ]]; then choice=22; fi
+        SSH_PORT=$choice
+
+        get_user_choice "SSH user name? " "^[a-z][a-z0-9_-]{0,30}$"
+        SSH_USER=$choice
+
+        cat << EOF
+
+EROAS supports 3 ways to authenticate SSH user
+
+    1. plain password 
+    2. default config/key setup under ~/.ssh
+    3. custom private key or certificate (.pem) file
+
+EOF
+
+        get_user_choice "Which SSH autentication method? (1/2/3) " "^(1|2|3)$"
+        SSH_AUTH_METHOD=$choice
+
+        if [[ $SSH_AUTH_METHOD == 1 ]]; then
+            get_user_choice "Please enter SSH password? " "^.+$"
+            SSH_AUTH_DATA=$choice
+        elif [[ $SSH_AUTH_METHOD == 3 ]]; then
+            while true; do
+                get_user_choice "Please input key/pem file path? " "^.*$"
+                SSH_AUTH_DATA=$(readlink -f $SSH_AUTH)
+                if [[ -f $SSH_AUTH_DATA ]]; then break; fi
+                echo "Key/pem file does not exist : $SSH_AUTH_DATA"
+            done
+        fi
+    fi
+}
+
 function setup_save() {
-    echo "CRYPTO_FS_PASSWORD=$CRYPTO_FS_PASSWORD" > $CONFIG_FILE
+    cat > $CONFIG_FILE << EOF
+CRYPTO_FS_PASSWORD=$CRYPTO_FS_PASSWORD
+NETWORK_MODE=$NETWORK_MODE
+NETWORK_HTTP=$NETWORK_HTTP
+SERVER_IP=$SERVER_IP
+SERVER_PORT=$SERVER_PORT
+SSH_PORT=$SSH_PORT
+SSH_USER=$SSH_USER
+SSH_AUTH_METHOD=$SSH_AUTH_METHOD
+SSH_AUTH_DATA=$SSH_AUTH_DATA
+EOF
+}
+
+function setup_closing() {
+    echo 
+    echo "=======> One-time setup is almost done!"
+    echo
+
+    get_user_choice "Is this the first time you run setup? (Y/n) " "^(y|n|)$"
+    if [[ $choice != "n" && $NETWORK_MODE == 1 ]]; then
+        echo
+        echo "All set! Starting Electrum wallet ..."
+        return
+    elif [[ $choice != "n" ]]; then
+        echo
+        echo "Please reboot the system for networking to take effect."
+        quitting
+    fi
+
+    get_user_choice "Did you change network settings this time? (y/n) " "^(y|n)$"
+    if [[ $choice == "y" ]]; then
+        echo
+        echo "Please reboot the system for networking to take effect."
+        quitting
+    else
+        echo
+        echo "All set! Starting Electrum wallet ..."
+    fi
 }
 
 function setup_config() {
     setup_banner
     setup_fs_password
-
+    setup_network
     setup_save
-
-    echo 
-    echo "=======> One-time setup is done!"
-    echo
+    setup_closing
 }
 
 # =============== main ==================
+
+function setup_ssh_tunnel() {
+    ret=$(netstat -tulpn 2>/dev/null | grep 50002)
+    if [[ ! -z $ret ]]; then
+        echo "SSH tunnel is already set up!"
+        return
+    fi
+
+    if [[ $SSH_AUTH_METHOD == 1 ]]; then
+        cmd="sshpass -p $SSH_AUTH_DATA ssh -fN -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP"
+    elif [[ $SSH_AUTH_METHOD == 2 ]]; then
+        cmd="ssh -fN -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
+    elif [[ $SSH_AUTH_METHOD == 3 ]]; then
+        cmd="ssh -fN -i $SSH_AUTH_DATA -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
+    else 
+        myerror "Unknown SSH auth method : $SSH_AUTH_METHOD"
+    fi
+
+    echo "Setting up SSH tunnel ... "
+    $cmd
+    if [[ $? != 0 ]]; then
+        myerror "Failed to set up SSH tunnel : $cmd"
+    fi
+}
+
 
 # be paranoid, check crypt_fs readiness
 while [[ ! -f /home/eroas_crypto_fs.bin ]]; do
@@ -144,7 +294,7 @@ if [[ ! -f $CONFIG_FILE ]]; then
 fi
 
 # parse config file
-parse_config "$CONFIG_FILE" "CRYPTO_FS_PASSWORD"
+parse_config "$CONFIG_FILE" "CRYPTO_FS_PASSWORD NETWORK_MODE NETWORK_HTTP SERVER_IP SERVER_PORT SSH_PORT SSH_USER SSH_AUTH_METHOD SSH_AUTH_DATA"
 if [[ $result != true ]]; then
     myerror "parsing config file failed"
 fi
@@ -170,10 +320,22 @@ fi
 
 echo
 echo "EROAS crypto filesystem is mounted. Starting Electrum ..."
-echo
 
 # start electrum. Use tor mode for now.
-nohup electrum -p 127.0.0.1:9050 > /dev/null 2>&1 &
+if [[ $NETWORK_MODE == 1 ]]; then
+    echo electrum -p 127.0.0.1:9050 
+    nohup electrum -p 127.0.0.1:9050 > /dev/null 2>&1 &
+elif [[ $NETWORK_MODE == 2 ]]; then
+    echo electrum -1 -s $SERVER_IP:$SERVER_PORT:s 
+    nohup electrum -1 -s $SERVER_IP:$SERVER_PORT:s > /dev/null 2>&1 &
+elif [[ $NETWORK_MODE == 3 ]]; then
+    setup_ssh_tunnel
+    echo electrum -1 -s 127.0.0.1:50002:s 
+    nohup electrum -1 -s 127.0.0.1:50002:s > /dev/null 2>&1 &
+else
+    myerror "Unknown networking mode : $NETWORK_MODE"
+fi
 
 # delayed quitting is necessary because electrum need time to get started
+echo
 quitting
