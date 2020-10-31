@@ -98,7 +98,7 @@ keypad protection.
 
 EOF
 
-    get_user_choice "Customize filesystem password? (Y/n) " "^(y|n|)$"
+    get_user_choice "Would you like to (or did you) customize filesystem password? (Y/n) " "^(y|n|)$"
     if [[ -z $choice ]]; then choice="y"; fi
 
     if [[ $choice == "n" ]]; then
@@ -108,7 +108,7 @@ EOF
 
     # change password
     echo
-    echo "Enter 'eroas' below (default password), and then set up your new one"
+    echo "Enter current filesystem password. Initial default is 'eroas'"
     echo
     while true; do
         cryptmount --change-password eroas_crypto_fs
