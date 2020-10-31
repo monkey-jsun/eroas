@@ -95,29 +95,25 @@ function setup_fs_password() {
 =======> Crypto filesystem password
 
 EROAS uses a password-protected encrypted filesystem to store Electrum 
-wallet data files. You are strongly encouraged to customize the password, 
-especially if you are using a standard USB drive without fingerprint or
-keypad protection.
+wallet data files.  You are strongly encouraged to change it to your 
+own password.
 
 EOF
 
-    get_user_choice "Would you like to (or did you) customize filesystem password? (Y/n) " "^(y|n|)$" true
-    if [[ -z $choice ]]; then choice="y"; fi
+    get_user_choice "Change crypto filesystem password? (Y/n) " "^(y|n|)$" true
+    if [[ $choice == "n" ]]; then return; fi
 
-    if [[ $choice == "n" ]]; then
-        CRYPTO_FS_PASSWORD=standard
-        return
-    fi
+    cat << EOF
 
-    # change password
-    echo
-    echo "Enter current filesystem password. Initial default is 'eroas'"
-    echo
+Enter current password first and then set up a new one.  Unless you have 
+changed it, initial password is 'eroas'. 
+EOF
+
     while true; do
+        echo
         cryptmount --change-password eroas_crypto_fs
         if [[ $? == 0 ]]; then break; fi
     done
-    CRYPTO_FS_PASSWORD=custom
 }
 
 function setup_network() {
@@ -211,7 +207,6 @@ EOF
 
 function setup_save() {
     cat > $CONFIG_FILE << EOF
-CRYPTO_FS_PASSWORD=$CRYPTO_FS_PASSWORD
 NETWORK_MODE=$NETWORK_MODE
 NETWORK_HTTP=$NETWORK_HTTP
 SERVER_IP=$SERVER_IP
@@ -297,7 +292,7 @@ if [[ ! -f $CONFIG_FILE ]]; then
 fi
 
 # parse config file
-parse_config "$CONFIG_FILE" "CRYPTO_FS_PASSWORD NETWORK_MODE NETWORK_HTTP SERVER_IP SERVER_PORT SSH_PORT SSH_USER SSH_AUTH_METHOD SSH_AUTH_DATA"
+parse_config "$CONFIG_FILE" "NETWORK_MODE NETWORK_HTTP SERVER_IP SERVER_PORT SSH_PORT SSH_USER SSH_AUTH_METHOD SSH_AUTH_DATA"
 if [[ $result != true ]]; then
     myerror "parsing config file failed"
 fi
@@ -307,18 +302,18 @@ fi
 # skip if crypto fs is already mounted
 if [[ $(mount | grep eroas_crypto_fs) ]]; then
     echo "EROAS crypto filesystem is already mounted."
-elif [[ $CRYPTO_FS_PASSWORD == "custom" ]]; then
-    echo "Mounting EROAS crypto filesystem ... enter your password below."
-    while true; do
-        cryptmount eroas_crypto_fs
-        if [[ $? == 0 ]]; then break; fi
-    done
-elif [[ $CRYPTO_FS_PASSWORD == "standard" ]]; then
-    echo "Mounting EROAS crypto filesystem with standard password ..."
-    exec 10<<<"eroas"
-    cryptmount --passwd-fd 10 eroas_crypto_fs 
 else
-    myerror "Unexpected value for CRYPTO_FS_PASSWORD : $CRYPTO_FS_PASSWORD"
+    # try auto-mount with default password
+    exec 10<<<"eroas"
+    cryptmount --passwd-fd 10 eroas_crypto_fs 2> /dev/null
+    # otherwise we ask user to enter the password
+    if [[ $? != 0 ]]; then
+        echo "Mounting EROAS crypto filesystem ... enter your password below."
+        while true; do
+            cryptmount eroas_crypto_fs
+            if [[ $? == 0 ]]; then break; fi
+        done
+    fi
 fi
 
 echo
