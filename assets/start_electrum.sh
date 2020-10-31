@@ -268,11 +268,11 @@ function setup_ssh_tunnel() {
     fi
 
     if [[ $SSH_AUTH_METHOD == 1 ]]; then
-        cmd="sshpass -p $SSH_AUTH_DATA ssh -fN -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP"
+        cmd="sshpass -p $SSH_AUTH_DATA ssh -fN -o 'StrictHostKeyChecking=no' -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP"
     elif [[ $SSH_AUTH_METHOD == 2 ]]; then
-        cmd="ssh -fN -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
+        cmd="ssh -fN -o 'StrictHostKeyChecking=no' -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
     elif [[ $SSH_AUTH_METHOD == 3 ]]; then
-        cmd="ssh -fN -i $SSH_AUTH_DATA -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
+        cmd="ssh -fN -i $SSH_AUTH_DATA -o 'StrictHostKeyChecking=no' -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
     else 
         myerror "Unknown SSH auth method : $SSH_AUTH_METHOD"
     fi
