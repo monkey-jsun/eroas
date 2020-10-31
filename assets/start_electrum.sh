@@ -23,10 +23,13 @@ function myerror() {
 # ask user to input until we get expected reuslts
 #   $1 : prompt; 
 #   $2 : regex pattern
+#   $3 : flag to lower case
 function get_user_choice() {
     while true; do
         read -p "$1" choice
-        choice=${choice,,} # tolower
+        if [[ $3 == true ]]; then
+            choice=${choice,,} # tolower
+        fi
         if [[ $choice =~ $2 ]]; then return; fi
         echo -e "\nUnexpected input.  Please try again.\n"
     done
@@ -98,7 +101,7 @@ keypad protection.
 
 EOF
 
-    get_user_choice "Would you like to (or did you) customize filesystem password? (Y/n) " "^(y|n|)$"
+    get_user_choice "Would you like to (or did you) customize filesystem password? (Y/n) " "^(y|n|)$" true
     if [[ -z $choice ]]; then choice="y"; fi
 
     if [[ $choice == "n" ]]; then
@@ -145,7 +148,7 @@ such as fiat currency balance.  Disabling it gives better security.
 
 EOF
 
-        get_user_choice "Allow outgoing HTTP/HTTPS traffic? (Y/n) " "^(y|n|)$"
+        get_user_choice "Allow outgoing HTTP/HTTPS traffic? (Y/n) " "^(y|n|)$" true
         if [[ -z $choice ]]; then choice="y"; fi
 
         NETWORK_HTTP=$choice
@@ -176,7 +179,7 @@ EOF
         if [[ -z $choice ]]; then choice=22; fi
         SSH_PORT=$choice
 
-        get_user_choice "SSH user name? " "^[a-z][a-z0-9_-]{0,30}$"
+        get_user_choice "SSH user name? " "^[a-z][a-z0-9_-]{0,30}$" false
         SSH_USER=$choice
 
         cat << EOF
@@ -193,11 +196,11 @@ EOF
         SSH_AUTH_METHOD=$choice
 
         if [[ $SSH_AUTH_METHOD == 1 ]]; then
-            get_user_choice "Please enter SSH password? " "^.+$"
+            get_user_choice "Please enter SSH password? " "^.+$" false
             SSH_AUTH_DATA=$choice
         elif [[ $SSH_AUTH_METHOD == 3 ]]; then
             while true; do
-                get_user_choice "Please input key/pem file path? " "^.*$"
+                get_user_choice "Please input key/pem file path? " "^.*$" false
                 SSH_AUTH_DATA=$(readlink -f $SSH_AUTH)
                 if [[ -f $SSH_AUTH_DATA ]]; then break; fi
                 echo "Key/pem file does not exist : $SSH_AUTH_DATA"
@@ -225,7 +228,7 @@ function setup_closing() {
     echo "=======> One-time setup is almost done!"
     echo
 
-    get_user_choice "Is this the first time you run setup? (Y/n) " "^(y|n|)$"
+    get_user_choice "Is this the first time you run setup? (Y/n) " "^(y|n|)$" true
     if [[ $choice != "n" && $NETWORK_MODE == 1 ]]; then
         echo
         echo "All set! Starting Electrum wallet ..."
@@ -236,7 +239,7 @@ function setup_closing() {
         quitting
     fi
 
-    get_user_choice "Did you change network settings this time? (y/n) " "^(y|n)$"
+    get_user_choice "Did you change network settings this time? (y/n) " "^(y|n)$" true
     if [[ $choice == "y" ]]; then
         echo
         echo "Please reboot the system for networking to take effect."
