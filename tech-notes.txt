@@ -1,3 +1,16 @@
+cryptmount
+
+- mount from script
+    cryptmount --passwd-fd 5 jsun_test 5< <(echo eroas)
+
+- empty password is allowed
+    cryptmount --passwd-fd 5 jsun_test 5< <(echo )
+
+- another way
+    exec 10<<<"eroas"
+    cryptmount --passwd-fd 10 jsun_test
+
+==========
 references
 
 - setup electrum/EPS

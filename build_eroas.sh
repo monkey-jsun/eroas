@@ -9,7 +9,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 CMD=(setup_host debootstrap run_chroot fixup build_iso)
 
-VERSION="v0.9.0+"
+VERSION="v1.0.0"
 DATE=`TZ="UTC" date +"%y%m%d-%H%M%S"`
 
 DEV=${DEV:-0}
@@ -113,7 +113,7 @@ function fixup() {
     chroot_enter_setup
 
     # create "EroasExport" FAT32 instead "writable" partition
-    # we have attached 100MB "home-rw" partition in ISO already for persistency
+    # we have attached "home-rw" partition in ISO already for persistency
     sudo patch -p0 < assets/01-create-eroas-export-partition.patch
 
 

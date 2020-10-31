@@ -1,4 +1,17 @@
 ===================
+v1.0.0, 10/30, 2020
+
+- Home-rw partition is limited to 256MB and built into ISO directly
+- Create a 4th partition (EroasExport) with FAT32 type and remaining space
+- Use encrypted fs (cryptmount) to store Electrum files (~/.electrum)
+- Support designated Electrum server modes, directly or via SSH
+- Tighten firewall rules based on current networking mode
+- One-setup to configure fs password, networking modes etc
+
+With this release, we achieved all initial goals set for this software.
+Hence it is declared as v1 release !!!
+
+===================
 v0.9.0, 10/24, 2020
 
 - Remove default user sudoer priviledge.  No root or sudoer in the whole system.
