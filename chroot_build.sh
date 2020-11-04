@@ -97,10 +97,6 @@ function install_wallet() {
 }
 
 function install_pkg() {
-    install_pkg_simple
-}
-
-function install_pkg_simple() {
     echo "=====> running install_pkg ... will take a long time ..."
     apt-get -y upgrade
 
@@ -149,82 +145,6 @@ EOF
     dpkg-reconfigure network-manager
 
     # strange, without apt-get clean, screen is dark, why??
-    apt-get clean -y
-}
-
-function install_pkg_full() {
-    echo "=====> running install_pkg ... will take a long time ..."
-    apt-get -y upgrade
-
-    # install live linux packages
-    apt-get install -y \
-    ubuntu-standard \
-    casper \
-    lupin-casper \
-    discover \
-    laptop-detect \
-    os-prober \
-    network-manager \
-    resolvconf \
-    net-tools \
-    wireless-tools \
-    wpagui \
-    locales \
-    linux-generic
-
-    # skip ubiquity
-    apt-get install -y \
-   ubiquity \
-   ubiquity-casper \
-   ubiquity-frontend-gtk \
-   ubiquity-slideshow-ubuntu \
-   ubiquity-ubuntu-artwork
-
-    # install graphics and desktop
-    apt-get install -y \
-    plymouth-theme-ubuntu-logo \
-    ubuntu-gnome-desktop \
-    ubuntu-gnome-wallpapers
-
-    # useful tools
-    apt-get install -y \
-    clamav-daemon \
-    terminator \
-    apt-transport-https \
-    curl \
-    vim \
-    nano \
-    less
-
-    # purge
-    apt-get purge -y \
-    transmission-gtk \
-    transmission-common \
-    gnome-mahjongg \
-    gnome-mines \
-    gnome-sudoku \
-    aisleriot \
-    hitori
-
-    # remove unused and clean up apt cache
-    apt-get autoremove -y
-
-    # final touch
-    dpkg-reconfigure locales
-    dpkg-reconfigure resolvconf
-
-    # network manager
-    cat <<EOF > /etc/NetworkManager/NetworkManager.conf
-[main]
-rc-manager=resolvconf
-plugins=ifupdown,keyfile
-dns=dnsmasq
-
-[ifupdown]
-managed=false
-EOF
-    dpkg-reconfigure network-manager
-
     apt-get clean -y
 }
 

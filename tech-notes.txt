@@ -32,3 +32,8 @@ references
 - ARM vs x86 performance study
     see http://junsun.net/wordpress/2020/10/aws-arm64-vs-x86_64-bitcoin-performance-comparison/
     t4g.medium is sufficient for running full node.
+
+- create bootable USB stick for MacOS
+    https://ubuntu.com/tutorials/create-a-usb-stick-on-macos#1-overview
+    https://discourse.ubuntu.com/t/create-a-bootable-usb-stick-on-macos/14016
+    https://itsfoss.com/create-bootable-ubuntu-usb-drive-mac-os/ (best)
