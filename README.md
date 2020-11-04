@@ -8,18 +8,20 @@ Its strong security level makes it suitable to protect assets over millions of d
 
 ### Networking modes:
 
-EROAS supports 3 networking modes:
+EROAS supports 4 networking modes:
 
-- Use Tor to connect to Electrum open netowrk (default; easy)
-- Connect to a designated Electrum server directly
-- Connect to a designated Electrum server via SSH tunnel (advaned)
+- Connect to Electrum open network directly (default)
+- Use Tor to connect to Electrum open netowrk for privacy
+- Connect to a designated Electrum server directly for trust/privacy
+- Connect to a designated Electrum server via SSH tunnel for trust/privacy (advaned)
 
 Strict firewall rules are imposed. 
 - No incoming connections
-- Outgoing connection is allowed for port 53 (DNS). 
-- Additionally,
-    - For Tor mode, port 9001 and optional 80/443 (HTTP/HTTPS) are allowed
-    - For single server mode, connection to the server is allowed at Electrum port (50002) or ssh port (22)
+- Outgoing connection is allowed for port 53 (DNS) and optional 80/443 (HTTP/HTTPS). 
+- Additional outgoing traffic is as allowed based on networking mode
+    - For direct connect mode, port 50002 is allowed
+    - For Tor mode, port 9001 is allowed
+    - For single server mode, connection to the server IP is allowed at Electrum port (50002) or ssh port (22)
 
 ### Security features
 
@@ -36,7 +38,7 @@ Strict firewall rules are imposed.
 - Use general purposed and open architecture hardware (PC/Mac/USB disks).  No proprietary code or hardware.
 - support both Mac and PC
 
-### Flash USB drive
+### Flash USB drive on
 
 - Get a spare USB drive with 2GB or bigger.
     - Backup exiting data as the whole drive will be wiped away.
@@ -50,6 +52,9 @@ Strict firewall rules are imposed.
     - Linux users can simply use dd command (e.g., "sudo dd if=eroas-v0.8.0-20201018-152032.iso of=/dev/sdb bs=4M")
 - To flush into fingerprint-protected or keypad-protected secure drive, unlock secure dirve first.  Select the secure drive as the flushing target.
     - Please do not install EROAS into both public and secure drive.  The persistent data partition will get mixed up.  
+
+Mac users please refer to additional instructions at [this link](https://itsfoss.com/create-bootable-ubuntu-usb-drive-mac-os)
+
 
 ### Use EROAS
 
@@ -77,3 +82,8 @@ Note - because we are using Tor networking with a very strict firewall, it might
     - "Configuring locales" screen #1 : select "end_US ISO-8859-1" and "en_US.UTF-8 UTF-8"
     - "Configuring locales" screen #2 : select "C.UTF-8"
 
+### Screenshots
+
+![](screenshots/eroas-startup.png)
+![](screenshots/eroas-setup.png)
+![](screenshots/eroas-wallet.png)
