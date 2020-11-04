@@ -68,20 +68,23 @@ CONFIG_FILE=/home/ubuntu/.eroas_config
 if [[ -f $CONFIG_FILE ]];then
     parse_config "$CONFIG_FILE" "NETWORK_MODE NETWORK_HTTP SERVER_IP SERVER_PORT SSH_PORT"
     if [[ $result != true ]]; then
-        NETWORK_MODE=0      # error case
+        NETWORK_MODE=-1      # error case
     fi
 else
-    #default to Tor with HTTP 
-    NETWORK_MODE=1
+    #default to open connect with HTTP 
+    NETWORK_MODE=0
     NETWORK_HTTP=y
 fi
 
-if [[ $NETWORK_MODE == 1 ]]; then
+if [[ $NETWORK_HTTP == "y" ]]; then
+    ufw allow out 80
+    ufw allow out 443
+fi
+
+if [[ $NETWORK_MODE == 0 ]]; then
+    ufw allow out 50002
+elif [[ $NETWORK_MODE == 1 ]]; then
     ufw allow out 9001
-    if [[ $NETWORK_HTTP == "y" ]]; then
-        ufw allow out 80
-        ufw allow out 443
-    fi
 elif [[ $NETWORK_MODE == 2 ]]; then
     ufw allow out to "$SERVER_IP" port "$SERVER_PORT"
 elif [[ $NETWORK_MODE == 3 ]]; then

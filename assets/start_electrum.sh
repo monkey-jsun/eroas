@@ -121,41 +121,26 @@ function setup_network() {
 
 =======> Networking setup
 
-EROAS supports 3 networking modes:
+EROAS supports 4 networking modes:
 
-    1. Use Tor to connect Electrum open servers (default)
+    0. Connect to Electrum open servers (port 50002) (default)
+    1. Use Tor to connect Electrum open servers (port 9001)
     2. Connect to dedicated Electrum server directly
     3. Connect to dedicated Electrum server via SSH (advanced)
 
 EOF
 
-    get_user_choice "Which mode do you like? (1/2/3, default:1) " "^(1|2|3|)$"
-    if [[ -z $choice ]]; then choice="1"; fi
+    get_user_choice "Which mode do you like? (0/1/2/3, default:0) " "^(0|1|2|3|)$"
+    if [[ -z $choice ]]; then choice="0"; fi
     NETWORK_MODE=$choice
 
-    if [[ $NETWORK_MODE == 1 ]]; then
-        cat << EOF
-
-=======> Allow outgoing HTTP/HTTPS
-
-Allowing outgoing HTTP/HTTPS will shorten the initial network connection 
-time whne you start Electrum. It also enables certain convenience features
-such as fiat currency balance.  Disabling it gives better security.
-
-EOF
-
-        get_user_choice "Allow outgoing HTTP/HTTPS traffic? (Y/n) " "^(y|n|)$" true
-        if [[ -z $choice ]]; then choice="y"; fi
-
-        NETWORK_HTTP=$choice
-    fi
 
     if [[ $NETWORK_MODE == 2 || $NETWORK_MODE == 3 ]]; then
         echo
         echo "=======> Electrum server info"
         echo
 
-        get_user_choice "Server IP address (NO domain name)? " "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$"
+        get_user_choice "Server IP address (no domain names)? " "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$"
         SERVER_IP=$choice
 
         get_user_choice "Server port (default:50002)? " "^([0-9]{2,5}|)$"
@@ -203,6 +188,20 @@ EOF
             done
         fi
     fi
+
+    cat << EOF
+
+=======> Allow outgoing HTTP/HTTPS
+
+Enabling outgoing HTTP/HTTPS will shorten initial network connection 
+time and also enable certain convenience features such as fiat currency 
+exchange rates. Disabling it gives better security.
+
+EOF
+
+    get_user_choice "Allow outgoing HTTP/HTTPS traffic? (Y/n) " "^(y|n|)$" true
+    if [[ -z $choice ]]; then choice="y"; fi
+    NETWORK_HTTP=$choice
 }
 
 function setup_save() {
@@ -224,7 +223,7 @@ function setup_closing() {
     echo
 
     get_user_choice "Is this the first time you run setup? (Y/n) " "^(y|n|)$" true
-    if [[ $choice != "n" && $NETWORK_MODE == 1 ]]; then
+    if [[ $choice != "n" && $NETWORK_MODE == 0 ]]; then
         echo
         echo "All set! Starting Electrum wallet ..."
         return
@@ -263,7 +262,7 @@ function setup_ssh_tunnel() {
     fi
 
     if [[ $SSH_AUTH_METHOD == 1 ]]; then
-        cmd="sshpass -p $SSH_AUTH_DATA ssh -fN -o 'StrictHostKeyChecking=no' -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP"
+        cmd="sshpass -p $SSH_AUTH_DATA ssh -fN -o StrictHostKeyChecking=no -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP"
     elif [[ $SSH_AUTH_METHOD == 2 ]]; then
         cmd="ssh -fN -o 'StrictHostKeyChecking=no' -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
     elif [[ $SSH_AUTH_METHOD == 3 ]]; then
@@ -320,7 +319,10 @@ echo
 echo "EROAS crypto filesystem is mounted. Starting Electrum ..."
 
 # start electrum. Use tor mode for now.
-if [[ $NETWORK_MODE == 1 ]]; then
+if [[ $NETWORK_MODE == 0 ]]; then
+    echo electrum 
+    nohup electrum > /dev/null 2>&1 &
+elif [[ $NETWORK_MODE == 1 ]]; then
     echo electrum -p 127.0.0.1:9050 
     nohup electrum -p 127.0.0.1:9050 > /dev/null 2>&1 &
 elif [[ $NETWORK_MODE == 2 ]]; then

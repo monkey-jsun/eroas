@@ -116,7 +116,7 @@ function install_pkg() {
     apt-get install -y xfce4
     
     # install some utils
-    apt-get install -y vim less curl apt-transport-https
+    apt-get install -y vim less curl apt-transport-https xfce4-screenshooter
 
     # disable cups by default (TODO: not working??)
     systemctl disable cups
