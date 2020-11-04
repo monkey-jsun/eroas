@@ -1,3 +1,7 @@
+![](screenshots/eroas-startup.png) | ![](screenshots/eroas-setup.png) |![](screenshots/eroas-wallet.png)
+---------|----------------|------------
+
+
 # EROAS
 
 EROAS stands for "Electrum Running On A Stick". 
@@ -82,8 +86,5 @@ Note - because we are using Tor networking with a very strict firewall, it might
     - "Configuring locales" screen #1 : select "end_US ISO-8859-1" and "en_US.UTF-8 UTF-8"
     - "Configuring locales" screen #2 : select "C.UTF-8"
 
-### Screenshots
 
-![](screenshots/eroas-startup.png)
-![](screenshots/eroas-setup.png)
-![](screenshots/eroas-wallet.png)
+
