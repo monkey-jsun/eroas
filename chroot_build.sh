@@ -118,6 +118,9 @@ function install_pkg() {
     # install some utils
     apt-get install -y vim less curl apt-transport-https xfce4-screenshooter
 
+    # install firefox
+    apt-get install -y firefox
+
     # disable cups by default (TODO: not working??)
     systemctl disable cups
 
