@@ -182,7 +182,7 @@ EOF
         elif [[ $SSH_AUTH_METHOD == 3 ]]; then
             while true; do
                 get_user_choice "Please input key/pem file path? " "^.*$" false
-                SSH_AUTH_DATA=$(readlink -f $SSH_AUTH)
+                SSH_AUTH_DATA=$(readlink -f $choice)
                 if [[ -f $SSH_AUTH_DATA ]]; then break; fi
                 echo "Key/pem file does not exist : $SSH_AUTH_DATA"
             done
@@ -264,9 +264,9 @@ function setup_ssh_tunnel() {
     if [[ $SSH_AUTH_METHOD == 1 ]]; then
         cmd="sshpass -p $SSH_AUTH_DATA ssh -fN -o StrictHostKeyChecking=no -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP"
     elif [[ $SSH_AUTH_METHOD == 2 ]]; then
-        cmd="ssh -fN -o 'StrictHostKeyChecking=no' -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
+        cmd="ssh -fN -o StrictHostKeyChecking=no -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
     elif [[ $SSH_AUTH_METHOD == 3 ]]; then
-        cmd="ssh -fN -i $SSH_AUTH_DATA -o 'StrictHostKeyChecking=no' -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
+        cmd="ssh -fN -i $SSH_AUTH_DATA -o StrictHostKeyChecking=no -L 127.0.0.1:50002:localhost:$SERVER_PORT $SSH_USER@$SERVER_IP" 
     else 
         myerror "Unknown SSH auth method : $SSH_AUTH_METHOD"
     fi
