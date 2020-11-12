@@ -1,4 +1,10 @@
 ===================
+v1.1.1, 11/12, 2020
+
+- Fix bugs in default key/custom key SSH tunneling
+- Add Firefox browser (need to open HTTP/HTTPS ports)
+
+===================
 v1.1.0, 11/04, 2020
 
 - Add direct connect networking mode and set it as default

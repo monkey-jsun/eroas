@@ -1,6 +1,5 @@
-![](screenshots/eroas-startup.png) | ![](screenshots/eroas-setup.png) |![](screenshots/eroas-wallet.png)
----------|----------------|------------
-
+![](screenshots/eroas-setup.png) |![](screenshots/eroas-wallet.png)
+----------------|------------
 
 # EROAS
 
@@ -32,7 +31,7 @@ Strict firewall rules are imposed.
 - The system image is an unmutable ISO image, resistent to all persistent attacks. 
     - No root user or sudoer in the whole system!
     - Persistent partition is mounted for /home (user data) only
-- Data partition is password-protected crypto file system 
+- Electrum data files are stored in a password-protected crypto file system 
 - Support fingerprint-protected secure drive for additional security
 - Strict firewall enforcement
 - Use Tor for additional privacy and security
@@ -42,7 +41,7 @@ Strict firewall rules are imposed.
 - Use general purposed and open architecture hardware (PC/Mac/USB disks).  No proprietary code or hardware.
 - support both Mac and PC
 
-### Flash USB drive on
+### Flash USB drive
 
 - Get a spare USB drive with 2GB or bigger.
     - Backup exiting data as the whole drive will be wiped away.
@@ -55,7 +54,6 @@ Strict firewall rules are imposed.
     - Windows users can also use [rufus](https://rufus.ie/).  Use all default options and choose "dd" method to do the final flashing.
     - Linux users can simply use dd command (e.g., "sudo dd if=eroas-v0.8.0-20201018-152032.iso of=/dev/sdb bs=4M")
 - To flush into fingerprint-protected or keypad-protected secure drive, unlock secure dirve first.  Select the secure drive as the flushing target.
-    - Please do not install EROAS into both public and secure drive.  The persistent data partition will get mixed up.  
 
 Mac users please refer to additional instructions at [this link](https://itsfoss.com/create-bootable-ubuntu-usb-drive-mac-os)
 
@@ -65,14 +63,16 @@ Mac users please refer to additional instructions at [this link](https://itsfoss
 - Insert EROAS USB drive into PC/MacBook and boot from USB drive.
     - Different machines have different methods for this step.   
     - Refer to [a quick guide](https://www.acronis.com/en-us/articles/usb-boot/) and [a more comprehensive guide](https://neosmart.net/wiki/boot-usb-drive/)
-- First time booting up, you may need to set up wifi connection.  On the top right corner, click an icon with 2 arrows.
-    - You only need to do this once for each new wifi network.
+- First time booting up, you may need to set up wifi connection.  
+    - On the top right corner, click on an icon with 2 arrows to set it up.
 - Click on the Electrum launcher icon on Desktop to run Electrum. 
     - Firt time running, you will go through a setup process.
-- Follow Electrum GUI to set up your wallets and perform transactions accordingly
+- Follow Electrum GUI, set up your wallets, and perform transactions accordingly
 - Afterwards shut down the machine and unplug the USB drive.
 
-Note - because we are using Tor networking with a very strict firewall, it might take up to 1 or 2 minutes for Electrum to make an initial connection to Electrum network.
+Note :
+- In Tor networking mode, it may take up to 1 or 2 minutes for Electrum to make an initial connection to Electrum network.
+- USB drive has an FAT32 "EroasExport" partition, useful for importing/exporting data
 
 ### Build ISO image
 
@@ -85,6 +85,3 @@ Note - because we are using Tor networking with a very strict firewall, it might
 - During the build you will be presented a few screens of choices.  Always choose the default, except for the followings
     - "Configuring locales" screen #1 : select "end_US ISO-8859-1" and "en_US.UTF-8 UTF-8"
     - "Configuring locales" screen #2 : select "C.UTF-8"
-
-
-
