@@ -5,7 +5,7 @@
 
 EROAS stands for "Electrum Running On A Stick". 
 It runs Electrum wallet, the best open source bitcoin wallet, on cheap USB drives,
-with cold-wallet level security and warm-wallet like convenience.
+with cold-wallet level security and hot-wallet like convenience.
 It is meant to operate like a saving account for infrequent transactions (perhaps <1 transaction per day).
 Its strong security level makes it suitable to protect assets over millions of dollars.
 
@@ -14,7 +14,7 @@ Its strong security level makes it suitable to protect assets over millions of d
 EROAS supports 4 networking modes:
 
 - Connect to Electrum open network directly (default)
-- Use Tor to connect to Electrum open netowrk for privacy
+- Use Tor to connect to Electrum open network for privacy
 - Connect to a designated Electrum server directly for trust/privacy
 - Connect to a designated Electrum server via SSH tunnel for trust/privacy (advaned)
 
