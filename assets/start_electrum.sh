@@ -202,6 +202,13 @@ EOF
     get_user_choice "Allow outgoing HTTP/HTTPS traffic? (Y/n) " "^(y|n|)$" true
     if [[ -z $choice ]]; then choice="y"; fi
     NETWORK_HTTP=$choice
+
+    # remove electrum cert file
+    if [[ $NETWORK_MODE == 2 ]]; then
+        rm -f $HOME/.electrum/certs/$SERVER_IP
+    elif [[ $NETWORK_MODE == 3 ]]; then
+        rm -f $HOME/.electrum/certs/127.0.0.1
+    fi
 }
 
 function setup_save() {
