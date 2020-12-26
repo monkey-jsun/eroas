@@ -85,7 +85,7 @@ function check_host() {
 function setup_host() {
     echo "=====> running setup_host ..."
     sudo apt update
-    sudo apt install -y binutils debootstrap squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin mtools
+    sudo apt install -y binutils debootstrap squashfs-tools grub-pc-bin grub-efi-amd64-bin 
     sudo mkdir -p chroot
 }
 
@@ -112,14 +112,14 @@ function fixup() {
 
     chroot_enter_setup
 
-    # create "EroasExport" FAT32 instead "writable" partition
-    # we have attached "home-rw" partition in ISO already for persistency
+    # instead of creating "writable" partition, we create 'home-rw" (ext4)
+    # and "EroasExport" (FAT32) instead 
     sudo patch -p0 < assets/01-create-eroas-export-partition.patch
 
 
     # remove sudoers.d/casper; we still need to remove ubuntu
-    # from sudo/adm group during runtime (eroas.service)
-    # only do this for production build
+    # from sudo/adm group during runtime (eroas.service/eroas_system_setup.sh)
+    # We only do this for production build. We can sudo with dev build.
     if [[ $DEV == 0 ]]; then
         sudo patch -p0 < assets/02-remove-ubuntu-sudoer.patch
     fi
@@ -186,7 +186,7 @@ function build_img() {
     dd if=/dev/zero of=$imgfile bs=1M count=$sizeMB
 
     # mount as a loop device
-    local lodev=$(losetup -f)
+    local lodev=$(sudo losetup -f)
     if [[ $lodev == "" ]]; then
         echo "cannot find a free loop device.... quitting!"
         exit 1
