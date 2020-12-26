@@ -3,7 +3,7 @@
 CONFIG_FILE=/home/ubuntu/.eroas_config
 
 function quitting() {
-    for (( count=5; count > 0; count-=1 )); do
+    for (( count=10; count > 0; count-=1 )); do
         echo -n -e "\rClosing in $count seconds ...."
         sleep 1
     done

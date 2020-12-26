@@ -1,5 +1,9 @@
 test procedure for release:
 
+environment
+
+- set up wifi; reboot and wifi should auto-connect
+
 crypto fs
 
 - don't set password and it should mount automatically on launching
@@ -11,9 +15,22 @@ networking
 
 Electrum modes
 
-- open mode
-- tor mode
-- dedicated server mode
-- ssh mode
-    - user/password
-    - certificate
+- delete ~/.eroas_config file and cycle through the following modes
+    - open mode
+    - tor mode
+    - dedicated server direct mode
+    - dedicated server with ssh mode
+        - user/password
+        - certificate
+
+misc
+- boot up with checking integrity.  It should power off in the end.
+- sudo should fail
+
+strongest secure setting
+========================
+
+- use personal crypto fs password
+- disable http/https
+- use dedicated server
+- use security protected USB drive (fingerprint or keypad)
