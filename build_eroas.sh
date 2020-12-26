@@ -194,7 +194,7 @@ function build_img() {
     local lopart=${lodev}p1
     sudo losetup $lodev $imgfile
 
-    # create an EFI partition
+    # create an EFI partition to fill the disk
     sgdisk --zap-all $imgfile
     sgdisk --new=1:0:0 --typecode=1:ef00 $imgfile
     sudo partprobe $lodev           # ask kernel to update part table
@@ -220,12 +220,12 @@ set default="0"
 set timeout=1
 
 menuentry "Run EROAS (Electrum Running On A Stick)" {
-   linux /casper/vmlinuz boot=casper persistent splash noprompt fsck.mode=skip ---
+   linux /casper/vmlinuz boot=casper persistent noprompt splash fsck.mode=skip ---
    initrd /casper/initrd
 }
 
 menuentry "Check USB disk for defects" {
-   linux /casper/vmlinuz boot=casper integrity-check fsck.mode=force quiet splash noprompt ---
+   linux /casper/vmlinuz boot=casper integrity-check noprompt splash fsck.mode=force ---
    initrd /casper/initrd
 }
 EOF

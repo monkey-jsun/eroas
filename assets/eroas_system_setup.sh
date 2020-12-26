@@ -37,6 +37,13 @@ function parse_config() {
 
 # ======== wifi persistency ================
 
+# check if we in integrity checking mode; and poweroff if yes
+if grep -Fq "integrity-check" /proc/cmdline; then
+    echo "We are in integrity checking mode.  Poweroff!"
+    systemctl poweroff
+    exit 0
+fi
+
 # create wifi persistent directory if not existing
 if [ ! -d /home/casper ]; then
     echo "first-time running; create /home/casper directory ..."
