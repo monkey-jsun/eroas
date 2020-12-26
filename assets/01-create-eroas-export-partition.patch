@@ -1,30 +1,75 @@
+diff -Nru chroot/usr/share/initramfs-tools/hooks/casper.orig chroot/usr/share/initramfs-tools/hooks/casper
+--- chroot/usr/share/initramfs-tools/hooks/casper.orig	2020-12-26 09:52:11.975644527 -0800
++++ chroot/usr/share/initramfs-tools/hooks/casper	2020-12-25 23:23:03.918491407 -0800
+@@ -20,10 +20,11 @@
+ 
+ manual_add_modules overlay
+ 
+-# We need losetup, mkfs.ext4 & sfdisk
++# We need losetup, mkfs.ext4, mkfs.fat & sgdisk
+ copy_exec /sbin/losetup /sbin
+ copy_exec /sbin/mkfs.ext4 /sbin
+-copy_exec /sbin/sfdisk /sbin
++copy_exec /sbin/mkfs.fat /sbin
++copy_exec /sbin/sgdisk /sbin
+ 
+ # Casper hooks
+ mkdir -p ${DESTDIR}/lib/casper
 diff -Nru chroot/usr/share/initramfs-tools/scripts/casper-helpers.orig chroot/usr/share/initramfs-tools/scripts/casper-helpers
---- chroot/usr/share/initramfs-tools/scripts/casper-helpers.orig	2020-10-25 12:20:26.199614838 -0700
-+++ chroot/usr/share/initramfs-tools/scripts/casper-helpers	2020-10-25 12:49:04.228224926 -0700
-@@ -297,10 +297,13 @@
-     if [ $((size - start*sectorsize)) -lt $((100*1024*1024)) ]; then
+--- chroot/usr/share/initramfs-tools/scripts/casper-helpers.orig	2020-12-26 09:52:07.631596652 -0800
++++ chroot/usr/share/initramfs-tools/scripts/casper-helpers	2020-12-26 09:54:25.965188619 -0800
+@@ -280,30 +280,38 @@
+ # not find one, and there is at least 100MiB space on $dev, it creates
+ # one there.
+ find_or_create_persistent_partition () {
+-    local DEVICE newpartno maxend start sectorsize size
++    local DEVICE disk_start disk_end disk_capacity
+     DEVICE=$1
+ 
+     udevadm settle
+ 
+-    if [ -e "/dev/disk/by-label/$(root_persistence_label)" ]; then
++    if [ -e "/dev/disk/by-label/home-rw" ]; then
+         return
+     fi
+-    newpartno=$(sfdisk -l $DEVICE -q | wc -l)
+-    maxend=$(sfdisk $DEVICE -l -q -o end | tail -n +2 | sort -n | tail -n1)
+-    start=$(((maxend + 1 + 0xfff) & ~0xfff))
+-    sectorsize=$(blockdev --getss $DEVICE)
+-    size=$(blockdev --getsize64 $DEVICE)
+-    # Do not bother creating a partition less than 100MiB
+-    if [ $((size - start*sectorsize)) -lt $((100*1024*1024)) ]; then
++
++    # to be safe, make sure 2nd GPT table moved to end of disk after dd
++    sgdisk -e $DEVICE
++
++    # we now can calculate the begin/end of largest free block
++    disk_start=$(sgdisk -F $DEVICE)
++    disk_end=$(sgdisk -E $DEVICE)
++    disk_capacity=$((disk_end - disk_start))
++
++    # if disk_capacity is less than 512MB+10MB (1,069,056 sectors, 512B/sec)
++    if [ $disk_capacity -lt 1069056 ]; then
          return
      fi
 -    echo "start=$start" | sfdisk --no-reread -q $DEVICE -a || return
-+    echo "start=$start,type=c" | sfdisk --no-reread -q $DEVICE -a || return
-     for d in ${DEVICE}$newpartno ${DEVICE}p$newpartno ${DEVICE}-part$newpartno; do
-         if [ -e $d ]; then
+-    for d in ${DEVICE}$newpartno ${DEVICE}p$newpartno ${DEVICE}-part$newpartno; do
+-        if [ -e $d ]; then
 -            mkfs.ext4 -q -L "$(root_persistence_label)" -F $d
-+            # [jsun] create fat32 for data import/export
-+            # Note we are attaching "home-rw" partition to ISO already
-+            # And there will be no "writable" in the whole system
-+            mkfs.fat -F 32 -n "EroasExport" $d
-             break
-         fi
-     done
-diff -Nru chroot/usr/share/initramfs-tools/hooks/casper.orig chroot/usr/share/initramfs-tools/hooks/casper
---- chroot/usr/share/initramfs-tools/hooks/casper.orig	2020-10-25 13:34:11.969859041 -0700
-+++ chroot/usr/share/initramfs-tools/hooks/casper	2020-10-25 13:35:36.142734101 -0700
-@@ -23,6 +23,7 @@
- # We need losetup, mkfs.ext4 & sfdisk
- copy_exec /sbin/losetup /sbin
- copy_exec /sbin/mkfs.ext4 /sbin
-+copy_exec /sbin/mkfs.fat /sbin
- copy_exec /sbin/sfdisk /sbin
- 
- # Casper hooks
+-            break
+-        fi
+-    done
++
++    # we now create 512MB ext4 as "home-rw" and the rest as FAT32 "EroasExport"
++    # NOTE we hardcode partnum to be 2!!!
++    sgdisk -n 0:$disk_start:+512M -t 0:8300 -c 0:"home-rw" $DEVICE || return
++    mkfs.ext4 -F -L "home-rw" ${DEVICE}2
++
++    # NOTE we hardcode partnum to be 3!!!
++    disk_start=$((disk_start + 1048576))
++    sgdisk -n 0:$disk_start:0 -t 0:0700 -c 0:"EroasExport" $DEVICE || return
++    mkfs.fat -F 32 -n "EroasExport" ${DEVICE}3
++
+     udevadm trigger
+     udevadm settle
+ }

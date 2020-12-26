@@ -74,6 +74,13 @@ Note :
 - In Tor networking mode, it may take up to 1 or 2 minutes for Electrum to make an initial connection to Electrum network.
 - USB drive has an FAT32 "EroasExport" partition, useful for importing/exporting data
 
+### Disk partitions
+
+USB drive is divided into 3 partitions
+1. EFI partition : ~1GB, FAT32, contains casper rootfs, linux and initrd
+1. Home partition : 512MB,  ext4, among which 128MB is reserved for Electrum crypto fs
+1. Data exchage : the rest of disk, FAT32, for exchanging data with other computers
+
 ### Build ISO image
 
 - Have a ubuntu 20.04 host
