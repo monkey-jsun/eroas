@@ -1,3 +1,13 @@
+TODO:
+
+- check integrity check boot entry
+    remove "splash quiet"?
+    fsck.check=force?
+    reboot after checking
+- run appImage instead and reduce size?
+    - auto-check and fetch latest version?
+
+=============
 cryptmount
 
 - mount from script
@@ -9,6 +19,63 @@ cryptmount
 - another way
     exec 10<<<"eroas"
     cryptmount --passwd-fd 10 jsun_test
+
+==========
+
+Tails OS
+
+- partition : GPT with protective MBR
+    no real MBR
+
+- single EFI partition that has
+    EFI/{BOOT,debian}
+    isolinux
+
+==========
+compare to tails OS
+
+- smaller size
+    EROAS only needs 2GB USB
+    tails OS needs > 12GB?
+
+- extra partition for data exchange
+    workaround in tails OS
+        boot up tails OS without configuring persistence partition
+            allow main partition to expand to 8GB
+        use gparted to add fat32 data exchange partition with desired size
+        boot up tails OS again and configure persistence partition
+            it will take up the remaining space on the disk
+
+- annoying pop-up about formatting partitions
+    WIP
+
+- tail os has more programs and is multi-purposed
+
+- tail os has configurable persistency for user data
+
+- tail os has tor browser
+    TODO
+
+- tail os has tor network only
+    TODO?
+
+- tail os allow root user and mutation of system image
+    anyone who access USB can install software
+
+- eroas has much restrictive networking control
+
+==========
+grub2 install
+
+https://www.runscripts.com/support/guides/tools/multiboot-usb/grub2-install
+
+options:
+--removable : install fallback bootloader, needed for USB
+--target=x86_64-efi
+
+explain 3 modes grub2 support: i386-pc x86_64-efi i386-efi
+
+https://colinxu.wordpress.com/2018/12/29/create-a-universal-bootable-usb-drive-using-grub2/
 
 ==========
 references
@@ -37,3 +104,16 @@ references
     https://ubuntu.com/tutorials/create-a-usb-stick-on-macos#1-overview
     https://discourse.ubuntu.com/t/create-a-bootable-usb-stick-on-macos/14016
     https://itsfoss.com/create-bootable-ubuntu-usb-drive-mac-os/ (best)
+
+- good one on debian live cd
+    https://willhaley.com/blog/custom-debian-live-environment/
+
+- create GPT on USB
+    https://wiki.ubuntu.com/USBStickUEFIHowto
+
+- use xorriso to create bios/uefi bootable img with both mbr/gpt
+    https://www.0xf8.org/2020/03/recreating-isos-that-boot-from-both-dvd-and-mass-storage-such-as-usb-sticks-and-in-both-legacy-bios-and-uefi-environments/
+
+- good explanation on bios vs EFI and GPT vs MBR
+    https://askubuntu.com/questions/860489/gpt-partition-scheme-for-uefi-from-bios-based-system
+    http://www.rodsbooks.com/efi-bootloaders/index.html

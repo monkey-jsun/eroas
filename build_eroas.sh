@@ -7,7 +7,7 @@ set -u                  # treat unset variable as error
 
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
-CMD=(setup_host debootstrap run_chroot fixup build_iso)
+CMD=(setup_host debootstrap run_chroot fixup build_casper build_img)
 
 VERSION="v1.1.1"
 DATE=`TZ="UTC" date +"%y%m%d-%H%M%S"`
@@ -159,20 +159,59 @@ function fixup() {
     chroot_exit_teardown
 }
 
-function build_iso() {
-    echo "=====> running build_iso ..."
+function build_casper() {
+    echo "=====> running build_casper ..."
 
+    # set up casper 
     rm -rf image
-    mkdir -p image/{casper,isolinux,install}
+    mkdir -p image/casper
 
     # copy kernel files
     sudo cp chroot/boot/vmlinuz-**-**-generic image/casper/vmlinuz
     sudo cp chroot/boot/initrd.img-**-**-generic image/casper/initrd
 
-    # grub
-    touch image/ubuntu
-    cat <<EOF > image/isolinux/grub.cfg
+    # compress rootfs
+    sudo mksquashfs chroot image/casper/filesystem.squashfs
+}
 
+function build_img() {
+    echo "=====> running build_img ..."
+
+    # calculate usb image size in MB, increase by 100MB
+    local sizeMB=$(du -s --block-size=1048576 image/casper/ | awk '{print $1}')
+    sizeMB=$((sizeMB+100))
+
+    # create empty usb image file 
+    local imgfile=$SCRIPT_DIR/eroas-$VERSION-$DATE.usb.img
+    dd if=/dev/zero of=$imgfile bs=1M count=$sizeMB
+
+    # mount as a loop device
+    local lodev=$(losetup -f)
+    if [[ $lodev == "" ]]; then
+        echo "cannot find a free loop device.... quitting!"
+        exit 1
+    fi
+    local lopart=${lodev}p1
+    sudo losetup $lodev $imgfile
+
+    # create an EFI partition
+    sgdisk --zap-all $imgfile
+    sgdisk --new=1:0:0 --typecode=1:ef00 $imgfile
+    sudo partprobe $lodev           # ask kernel to update part table
+    sudo mkfs.vfat -F 32 -n EROAS$VERSION $lopart
+
+    # mount partition
+    sudo mkdir -p /mnt/eroas
+    sudo mount $lopart /mnt/eroas
+
+    # copy casper
+    sudo cp -r image/casper /mnt/eroas/
+
+    # install grub2
+    sudo grub-install --target=x86_64-efi --efi-directory=/mnt/eroas --boot-directory=/mnt/eroas/boot --removable $lodev
+
+    # setup grub config
+    cat <<EOF > /tmp/grub.cfg
 search --set=root --file /ubuntu
 
 insmod all_video
@@ -185,11 +224,18 @@ menuentry "Run EROAS (Electrum Running On A Stick)" {
    initrd /casper/initrd
 }
 
-menuentry "Check disc for defects" {
-   linux /casper/vmlinuz boot=casper integrity-check quiet splash ---
+menuentry "Check USB disk for defects" {
+   linux /casper/vmlinuz boot=casper integrity-check fsck.mode=force quiet splash noprompt ---
    initrd /casper/initrd
 }
 EOF
+    sudo cp -f /tmp/grub.cfg /mnt/eroas/boot/grub/grub.cfg
+
+    # calculate checksum
+    (   
+        cd /mnt/eroas
+        sudo /bin/bash -c "(find . -type f -print0 | xargs -0 md5sum | grep -v -e 'md5sum.txt' > md5sum.txt)"
+    )
 
 # options
 #   noprompt - don't ask to eject media on reboot/shutdown
@@ -199,95 +245,9 @@ EOF
 # original option
 #   linux /casper/vmlinuz boot=casper nopersistent toram quiet splash ---
 
-    # generate manifest
-    sudo chroot chroot dpkg-query -W --showformat='${Package} ${Version}\n' | sudo tee image/casper/filesystem.manifest
-    sudo cp -v image/casper/filesystem.manifest image/casper/filesystem.manifest-desktop
-    sudo sed -i '/ubiquity/d' image/casper/filesystem.manifest-desktop
-    sudo sed -i '/casper/d' image/casper/filesystem.manifest-desktop
-    sudo sed -i '/discover/d' image/casper/filesystem.manifest-desktop
-    sudo sed -i '/laptop-detect/d' image/casper/filesystem.manifest-desktop
-    sudo sed -i '/os-prober/d' image/casper/filesystem.manifest-desktop
-
-    # compress rootfs
-    sudo mksquashfs chroot image/casper/filesystem.squashfs
-    printf $(sudo du -sx --block-size=1 chroot | cut -f1) > image/casper/filesystem.size
-
-    # create diskdefines
-    cat <<EOF > image/README.diskdefines
-#define DISKNAME  Electrum Running On A Stick
-#define TYPE  binary
-#define TYPEbinary  1
-#define ARCH  amd64
-#define ARCHamd64  1
-#define DISKNUM  1
-#define DISKNUM1  1
-#define TOTALNUM  0
-#define TOTALNUM0  1
-EOF
-
-    # create iso image
-    pushd $SCRIPT_DIR/image
-    grub-mkstandalone \
-        --format=x86_64-efi \
-        --output=isolinux/bootx64.efi \
-        --locales="" \
-        --fonts="" \
-        "boot/grub/grub.cfg=isolinux/grub.cfg"
-    
-    (
-        cd isolinux && \
-        dd if=/dev/zero of=efiboot.img bs=1M count=10 && \
-        sudo mkfs.vfat efiboot.img && \
-        LC_CTYPE=C mmd -i efiboot.img efi efi/boot && \
-        LC_CTYPE=C mcopy -i efiboot.img ./bootx64.efi ::efi/boot/
-    )
-
-    (
-        cd isolinux && \
-        dd if=/dev/zero of=home-rw.img bs=1M count=256 && \
-        mkfs.ext4 home-rw.img && \
-        tune2fs -L home-rw home-rw.img 
-    )
-
-    grub-mkstandalone \
-        --format=i386-pc \
-        --output=isolinux/core.img \
-        --install-modules="linux16 linux normal iso9660 biosdisk memdisk search tar ls" \
-        --modules="linux16 linux normal iso9660 biosdisk search" \
-        --locales="" \
-        --fonts="" \
-        "boot/grub/grub.cfg=isolinux/grub.cfg"
-
-    cat /usr/lib/grub/i386-pc/cdboot.img isolinux/core.img > isolinux/bios.img
-
-    sudo /bin/bash -c "(find . -type f -print0 | xargs -0 md5sum | grep -v -e 'md5sum.txt' -e 'bios.img' -e 'efiboot.img' > md5sum.txt)"
-
-    sudo xorriso \
-        -as mkisofs \
-        -iso-level 3 \
-        -full-iso9660-filenames \
-        -volid "EROAS_$VERSION" \
-        -eltorito-boot boot/grub/bios.img \
-        -no-emul-boot \
-        -boot-load-size 4 \
-        -boot-info-table \
-        --eltorito-catalog boot/grub/boot.cat \
-        --grub2-boot-info \
-        --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img \
-        -eltorito-alt-boot \
-        -e EFI/efiboot.img \
-        -no-emul-boot \
-        -append_partition 2 0xef isolinux/efiboot.img \
-        -append_partition 3 0x83 isolinux/home-rw.img \
-        -output "../eroas-$VERSION-$DATE.iso" \
-        -m "isolinux/efiboot.img" \
-        -m "isolinux/bios.img" \
-        -graft-points \
-           "/EFI/efiboot.img=isolinux/efiboot.img" \
-           "/boot/grub/bios.img=isolinux/bios.img" \
-           "."
-
-    popd
+    # dismount etc
+    sudo umount /mnt/eroas
+    sudo losetup -d $lodev
 }
 
 # =============   main  ================
