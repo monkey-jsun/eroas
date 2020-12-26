@@ -1,12 +1,3 @@
-TODO:
-
-- check integrity check boot entry
-    remove "splash quiet"?
-    fsck.check=force?
-    reboot after checking
-- run appImage instead and reduce size?
-    - auto-check and fetch latest version?
-
 =============
 cryptmount
 

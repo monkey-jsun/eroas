@@ -9,7 +9,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 CMD=(setup_host debootstrap run_chroot fixup build_casper build_img)
 
-VERSION="v1.1.1"
+VERSION="v1.2.0"
 DATE=`TZ="UTC" date +"%y%m%d-%H%M%S"`
 
 DEV=${DEV:-0}

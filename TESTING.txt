@@ -1,0 +1,19 @@
+test procedure for release:
+
+crypto fs
+
+- don't set password and it should mount automatically on launching
+- otherwise it should ask for password
+
+networking
+
+- HTTP/HTTPS enable and disable
+
+Electrum modes
+
+- open mode
+- tor mode
+- dedicated server mode
+- ssh mode
+    - user/password
+    - certificate
