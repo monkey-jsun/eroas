@@ -36,6 +36,7 @@ Strict firewall rules are imposed.
 - Strict firewall enforcement
 - Use Tor for additional privacy and security
 - Support designated electrum server mode
+    - You can own a [dedicated electrum server easily on AWS](https://aws.amazon.com/marketplace/pp/B08PZ7MVMS?qid=1609886178597)
 - Leverage usual security measures in Electrum wallet (e.g, wallet password)
 - Every piece of code is open source and everyone can build from scratch
 - Use general purposed and open architecture hardware (PC/Mac/USB disks).  No proprietary code or hardware.
