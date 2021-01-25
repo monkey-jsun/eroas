@@ -93,3 +93,14 @@ USB drive is divided into 3 partitions
 - During the build you will be presented a few screens of choices.  Always choose the default, except for the followings
     - "Configuring locales" screen #1 : select "end_US ISO-8859-1" and "en_US.UTF-8 UTF-8"
     - "Configuring locales" screen #2 : select "C.UTF-8"
+
+### Donation and Channel Connect on Lightning Network
+If you find this work is useful, please feel free to make a donation or open a channel with my Lightning Network node.
+
+For donation, Bitcoin wallet address is "bc1qyc48kmpweyx2kpqhq8n6r0ckr2fqsfvz2qxpx4"
+
+![](screenshots/bitcoin-donation-lnd.png?raw=true) 
+
+For Lightning Network, my node public key is "0362a4372375bd24c5b8f8bb2ea85ae2ccf783808477e68cfb06121694b34d1927"
+
+![](screenshots/ln-connect-pub-key.png?raw=true) 
