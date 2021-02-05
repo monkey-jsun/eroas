@@ -37,6 +37,7 @@ Strict firewall rules are imposed.
 - Use Tor for additional privacy and security
 - Support designated electrum server mode
     - You can own a [dedicated electrum server easily on AWS](https://aws.amazon.com/marketplace/pp/B08PZ7MVMS?qid=1609886178597)
+    - Alternatively, [you can set up such a server on a raspberry pi 4](http://junsun.net/wordpress/2021/01/setup-bitcoin-electrum-lightning-network-on-raspberry-pi-4/)
 - Leverage usual security measures in Electrum wallet (e.g, wallet password)
 - Every piece of code is open source and everyone can build from scratch
 - Use general purposed and open architecture hardware (PC/Mac/USB disks).  No proprietary code or hardware.
@@ -56,7 +57,7 @@ Strict firewall rules are imposed.
     - Linux users can simply use dd command (e.g., "sudo dd if=eroas-v0.8.0-20201018-152032.iso of=/dev/sdb bs=4M")
 - To flush into fingerprint-protected or keypad-protected secure drive, unlock secure dirve first.  Select the secure drive as the flushing target.
 
-Mac users please refer to additional instructions at [this link](https://itsfoss.com/create-bootable-ubuntu-usb-drive-mac-os)
+Mac users please refer to additional instructions at [this link](https://itsfoss.com/create-bootable-ubuntu-usb-drive-mac-os) and [this link](https://tails.boum.org/doc/first_steps/start/mac/index.en.html)
 
 
 ### Use EROAS
