@@ -68,7 +68,7 @@ Mac users please refer to additional instructions at [this link](https://itsfoss
 - First time booting up, you may need to set up wifi connection.  
     - On the top right corner, click on an icon with 2 arrows to set it up.
 - Click on the Electrum launcher icon on Desktop to run Electrum. 
-    - Firt time running, you will go through a setup process.
+    - For the first time running, you will go through a setup process.
 - Follow Electrum GUI, set up your wallets, and perform transactions accordingly
 - Afterwards shut down the machine and unplug the USB drive.
 
