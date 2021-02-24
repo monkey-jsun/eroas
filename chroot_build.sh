@@ -112,6 +112,11 @@ function install_pkg() {
         wpagui \
         locales
 
+    # install wifi driver for macbook, 
+    # see https://askubuntu.com/questions/55868/installing-broadcom-wireless-drivers
+    apt-get install -y firmware-b43-installer
+    apt-get install -y bcmwl-kernel-source 
+
     # install graphics and desktop
     apt-get install -y xfce4
     
