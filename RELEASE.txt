@@ -1,8 +1,13 @@
 ===================
+v1.3.0, 02/24, 2021
+
+- Add wifi support to Intel-based MacBook. Now it really works on MacBook.
+
+===================
 v1.2.0, 12/26, 2020
 
 - Make UEFI/GPT USB disk image directly instead of ISO image.  This eliminates 1 system parttion and also avoids Windows complain about unrecognizable partitions.
-- Poweroff after performing integrity check to avoid confusion with non-persisten GUI
+- Poweroff after performing integrity check to avoid confusion with non-persistent GUI
 - Update Electrum to v4.0.9 and install Appimage file instead of python source.
 - BUG FIX : remove stale electrum server certificate when reconfiguring.
 
