@@ -102,6 +102,3 @@ For donation, Bitcoin wallet address is "bc1qyc48kmpweyx2kpqhq8n6r0ckr2fqsfvz2qx
 
 ![](screenshots/bitcoin-donation-lnd.png?raw=true) 
 
-For Lightning Network, my node public key is "0362a4372375bd24c5b8f8bb2ea85ae2ccf783808477e68cfb06121694b34d1927"
-
-![](screenshots/ln-connect-pub-key.png?raw=true) 
