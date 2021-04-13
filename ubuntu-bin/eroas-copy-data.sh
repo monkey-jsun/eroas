@@ -13,13 +13,22 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 function help() {
-    echo -e "Usage : \n\t$0 <src usb dev> <dest usb dev>"
-    echo
-    echo -e "\tCopy data from one EROAS USB to another (usually for upgrading)"
-    echo -e "\tDestination usb must have booted up at least once"
-    echo
-    echo -e "Example : \n\t$0 sdb sdc"
-    echo
+    cat << EOF
+Usage : $0 <src usb dev> <dest usb dev>
+
+    Copy data from one EROAS USB to another (usually for upgrading)
+    Specifically we copy
+        everything on EroasExport partition (except vmware/ folder)
+        encrypted fs that contains the wallet
+        /home/casper/ that contains rw system files (e.g., wifi credential)
+        eroas config file
+        /home/ubuntu/bin
+
+    Destination usb must have booted up at least once"
+
+Example : $0 sdb sdc"
+
+EOF
     exit 1
 }
 
@@ -47,6 +56,46 @@ function check_eroas_usb() {
     fi
 }
 
+# check to dst contains newer files than src
+function check_newer() {
+    local src=$1
+    local dst=$2
+
+    local tmp=$(rsync --dry-run -i --update -a $2 $1 | grep "^>f" | grep -v "^>f+++++")
+    if [[ $tmp != "" ]]; then
+        echo "$tmp"
+        myerror "destination folder has newer files : $2"
+    fi
+}
+
+function do_copying() {
+    local dry_run=$1
+
+    # copy export partition
+    mount /dev/${src_disk}3 /mnt/tmp1
+    mount /dev/${dst_disk}3 /mnt/tmp2
+    
+    echo copy EroasExport partition data ....
+    rsync $dry_run -a -i --update --delete --exclude="vmware" /mnt/tmp1/ /mnt/tmp2/
+    
+    umount /mnt/tmp1
+    umount /mnt/tmp2
+    
+    # copy home-rw partitoin
+    echo
+    echo copy home-rw partition data ....
+    mount /dev/${src_disk}2 /mnt/tmp1
+    mount /dev/${dst_disk}2 /mnt/tmp2
+    
+    list="casper/ eroas_crypto_fs.bin ubuntu/.eroas_config ubuntu/bin/"
+    for i in $list; do
+        rsync $dry_run -a -i --update --delete /mnt/tmp1/$i /mnt/tmp2/$i
+    done
+    
+    umount /mnt/tmp1
+    umount /mnt/tmp2
+}
+
 # check # of args
 if [[ $# != 2 ]]; then
     help
@@ -64,34 +113,37 @@ mkdir -p /mnt/tmp2
 umount /mnt/tmp1 || true
 umount /mnt/tmp2 || true
 
-# we insist export partition should be empty
-mount /dev/${dst_disk}3 /mnt/tmp2
-if [[ "$(ls -A /mnt/tmp2)" ]]; then
-    umount /mnt/tmp2
-    myerror "destination disk export partition is not empty"
-fi
-
-# copy export partition
-echo copy EroasExport partition data ....
+# we insist dst_disk should not contain newer files
 mount /dev/${src_disk}3 /mnt/tmp1
-cp -a /mnt/tmp1/* /mnt/tmp2/
+mount /dev/${dst_disk}3 /mnt/tmp2
+
+# note ending '/' is meaningful here!!!
+check_newer /mnt/tmp1/ /mnt/tmp2/
 
 umount /mnt/tmp1
 umount /mnt/tmp2
 
-# copy home-rw partitoin
-echo copy home-rw partition data ....
+# check for newer files in dst home folder
 mount /dev/${src_disk}2 /mnt/tmp1
 mount /dev/${dst_disk}2 /mnt/tmp2
 
-list="casper eroas_crypto_fs.bin ubuntu/.eroas_config ubuntu/bin"
-pushd /mnt/tmp1
+list="casper/ eroas_crypto_fs.bin ubuntu/.eroas_config ubuntu/bin/"
 for i in $list; do
-    cp -a --parents $i /mnt/tmp2/
+    check_newer /mnt/tmp1/$i /mnt/tmp2/$i
 done
-popd
 
 umount /mnt/tmp1
 umount /mnt/tmp2
+
+
+do_copying "--dry-run"
+
+echo
+read -p "Please review changes above and enter YES to commit : " answer
+if [[ $answer != "YES" ]]; then
+    exit 0
+fi
+
+do_copying ""
 
 echo "Done!"
