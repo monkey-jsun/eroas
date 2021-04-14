@@ -16,8 +16,8 @@ function help() {
     cat << EOF
 Usage : $0 <src usb dev> <dest usb dev>
 
-    Copy data from one EROAS USB to another (usually for upgrading)
-    Specifically we copy
+    Restore data from one EROAS USB to another (usually for restoring on a new USB)
+    Specifically we copy forcefully
         everything on EroasExport partition (except vmware/ folder)
         encrypted fs that contains the wallet
         /home/casper/ that contains rw system files (e.g., wifi credential)
@@ -61,11 +61,7 @@ function check_newer() {
     local src=$1
     local dst=$2
 
-    local tmp=$(rsync --dry-run -i --update -a $2 $1 | grep "^>f" | grep -v "^>f+++++")
-    if [[ $tmp != "" ]]; then
-        echo "$tmp"
-        myerror "destination folder has newer files : $2"
-    fi
+    (rsync --dry-run -i --update -a $2 $1 | grep "^>f") || true
 }
 
 function do_copying() {
@@ -76,7 +72,7 @@ function do_copying() {
     mount /dev/${dst_disk}3 /mnt/tmp2
     
     echo copy EroasExport partition data ....
-    rsync $dry_run -a -i --update --delete --exclude="vmware" /mnt/tmp1/ /mnt/tmp2/
+    rsync $dry_run -a -i --delete --exclude="vmware" /mnt/tmp1/ /mnt/tmp2/
     
     umount /mnt/tmp1
     umount /mnt/tmp2
@@ -89,7 +85,7 @@ function do_copying() {
     
     list="casper/ eroas_crypto_fs.bin ubuntu/.eroas_config ubuntu/bin/"
     for i in $list; do
-        rsync $dry_run -a -i --update --delete /mnt/tmp1/$i /mnt/tmp2/$i
+        rsync $dry_run -a -i --delete /mnt/tmp1/$i /mnt/tmp2/$i
     done
     
     umount /mnt/tmp1
@@ -113,7 +109,8 @@ mkdir -p /mnt/tmp2
 umount /mnt/tmp1 || true
 umount /mnt/tmp2 || true
 
-# we insist dst_disk should not contain newer files
+echo "check for newer or to-be-deleted files on destination disk ..."
+
 mount /dev/${src_disk}3 /mnt/tmp1
 mount /dev/${dst_disk}3 /mnt/tmp2
 
@@ -135,6 +132,11 @@ done
 umount /mnt/tmp1
 umount /mnt/tmp2
 
+echo
+read -p "Please review and enter YES to proceed : " answer
+if [[ $answer != "YES" ]]; then
+    exit 0
+fi
 
 do_copying "--dry-run"
 
