@@ -62,7 +62,7 @@ function check_newer() {
     local src=$1
     local dst=$2
 
-    local tmp=$(rsync --dry-run -i --update -a $2 $1 | grep "^>f" | grep -v "^>f+++++")
+    local tmp=$(rsync --dry-run -a -i --update $2 $1 | grep "^>f" | grep -v "^>f+++++")
     if [[ $tmp != "" ]]; then
         echo
         echo "WARNING : destination folder has newer files : $2"
@@ -110,6 +110,13 @@ dst_disk=$2
 check_eroas_usb $src_disk
 check_eroas_usb $dst_disk
 
+# umount partitions if already mounted
+umount /dev/${src_disk}2 || true
+umount /dev/${dst_disk}2 || true
+umount /dev/${src_disk}3 || true
+umount /dev/${dst_disk}3 || true
+
+# check newer or to-be-deleted
 mkdir -p /mnt/tmp1
 mkdir -p /mnt/tmp2
 
