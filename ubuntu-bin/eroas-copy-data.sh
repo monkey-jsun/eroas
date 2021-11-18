@@ -16,15 +16,16 @@ function help() {
     cat << EOF
 Usage : $0 <src usb dev> <dest usb dev>
 
-    Restore data from one EROAS USB to another (usually for restoring on a new USB)
+    copy EROAS data from one EROAS USB to another for backup/restore
     Specifically we copy forcefully
-        everything on EroasExport partition (except vmware/ folder)
+        everything on EroasExport partition 
         encrypted fs that contains the wallet
-        /home/casper/ that contains rw system files (e.g., wifi credential)
+        /home/casper/ that contains rw system files (e.g., wifi pass, fs key)
         eroas config file
         /home/ubuntu/bin
 
-    Destination usb must have booted up at least once"
+    Source and destination usb must have standard partition layout
+    Destination USB must have booted up at least once to have standard layout"
 
 Example : $0 sdb sdc"
 
@@ -61,7 +62,13 @@ function check_newer() {
     local src=$1
     local dst=$2
 
-    (rsync --dry-run -i --update -a $2 $1 | grep "^>f") || true
+    local tmp=$(rsync --dry-run -i --update -a $2 $1 | grep "^>f" | grep -v "^>f+++++")
+    if [[ $tmp != "" ]]; then
+        echo
+        echo "WARNING : destination folder has newer files : $2"
+        echo "$tmp"
+        echo
+    fi
 }
 
 function do_copying() {
@@ -72,7 +79,7 @@ function do_copying() {
     mount /dev/${dst_disk}3 /mnt/tmp2
     
     echo copy EroasExport partition data ....
-    rsync $dry_run -a -i --delete --exclude="vmware" /mnt/tmp1/ /mnt/tmp2/
+    rsync $dry_run -a -i --delete /mnt/tmp1/ /mnt/tmp2/
     
     umount /mnt/tmp1
     umount /mnt/tmp2
@@ -133,7 +140,7 @@ umount /mnt/tmp1
 umount /mnt/tmp2
 
 echo
-read -p "Please review and enter YES to proceed : " answer
+read -p "Please review and enter YES to proceed with dry-run : " answer
 if [[ $answer != "YES" ]]; then
     exit 0
 fi
