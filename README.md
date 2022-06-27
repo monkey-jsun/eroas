@@ -96,9 +96,9 @@ USB drive is divided into 3 partitions
     - "Configuring locales" screen #2 : select "C.UTF-8"
 
 ### Donation and Channel Connect on Lightning Network
-If you find this work is useful, please feel free to make a donation or open a channel with my Lightning Network node.
+If you find this work is useful, please feel free to make a donation 
 
-For donation, Bitcoin wallet address is "bc1qyc48kmpweyx2kpqhq8n6r0ckr2fqsfvz2qxpx4"
+For donation, Bitcoin wallet address is "bc1qajuwaq620f5s2a4t2dakl9tw0pllj63hw4mqmt"
 
-![](screenshots/bitcoin-donation-lnd.png?raw=true) 
+![](screenshots/bitcoin-cb-eroas-donation-address.jpg?raw=true) 
 
